@@ -1,4 +1,4 @@
-use std::ops::{Add, Mul};
+use std::ops::{Add, Sub, Mul};
 
 // Scale 2^-16 = 0.0000152587890625 (divide by 65536)
 // p = 21888242871839275222246405745257275088548364400416034343698204186575808495617
@@ -15,8 +15,17 @@ struct Quantized {
 }
 
 impl Quantized {
+
+    fn zero() -> Self {
+        Quantized { x: 0 }
+    }
+
     fn add(self: Self, other: Self) -> Self {
         Quantized { x: self.x + other.x } // if one is negative, this wraps around automatically
+    }
+
+    fn sub(self: Self, other: Self) -> Self {
+        Quantized { x: self.x - other.x }
     }
 
     fn mul(self: Self, other: Self) -> Self {
@@ -24,7 +33,7 @@ impl Quantized {
         let mut bytes: [u8; 32] = temp.to_be_bytes();
 
         // check if there are bytes from 0-15, then it is negative
-        // This assumes the values that are multiplied have max ~60-63 bits 
+        // This assumes the values that are multiplied have max ~60-63 bits
         let mut negative = false;
 
         for i in 0..16 {
@@ -62,6 +71,12 @@ impl Quantized {
 impl Add for Quantized {
     fn add(self, other: Self) -> Self {
         self.add(other)
+    }
+}
+
+impl Sub for Quantized {
+    fn sub(self, other: Self) -> Self {
+        self.sub(other)
     }
 }
 
@@ -167,7 +182,7 @@ fn test_mul() {
     // 0.6103515625 * -0.457763671875 = -0.2793967723846435546875
     let mult4_quantized = a4_quantized * b4_quantized;
     // -0.2793967723846435546875 * 2^16 = -18310.546875
-    assert(mult4_quantized.x == -18310); 
+    assert(mult4_quantized.x == -18310);
 
     // Test case 5: Both values negative
     let a5 = -40000; // Original value -40000 / 2^16 = -0.6103515625

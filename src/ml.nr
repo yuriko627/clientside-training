@@ -17,16 +17,28 @@ fn approx_sigmoid(x: Quantized) -> Quantized {
         (Quantized::new(1819) * x) + Quantized::new(56031), //0.02776 and 0.85498, 0.85498/2^-16 = 56031.96928
         Quantized::new(65529), //0.9999 / 2^-16 = 65529.4464
     ];
-    Quantized::zero()
+
+    let mut index = 4; // Default to the last index in case x is above all cuts
+    // Determine the correct interval index by checking against each cut
+    if x <= cuts[0] {
+        index = 0;
+    } else if x <= cuts[1] {
+        index = 1;
+    } else if x <= cuts[2] {
+        index = 2;
+    } else if x <= cuts[3] {
+        index = 3;
+    }
+    outputs[index]
 }
 
-fn get_prediction(weights: [Quantized; 4], inputs: [Quantized; 4]) -> Quantized {
+fn get_prediction(weights: [Quantized; 4], inputs: [Quantized; 4], bias: Quantized) -> Quantized {
     // let z = weights dot_product inputs
     let mut z = Quantized::zero();
     for i in 0..4 {
         z += weights[i] * inputs[i];
     }
-    approx_sigmoid(z)
+    approx_sigmoid(z + bias)
 }
 
 fn train(
@@ -34,7 +46,7 @@ fn train(
     inputs: [[Quantized; 4]; 30],
     labels: [Quantized],
     learning_rate: Quantized,
-    ratio: Quantized,
+    ratio: Quantized, // ratio = 1/number_samples scaled
 ) -> ([Quantized; 4], Quantized) {
     let mut final_weights = [Quantized::zero(); 4];
     let mut final_bias = Quantized::zero();
@@ -44,21 +56,21 @@ fn train(
         let mut bias_gradient = Quantized::zero();
 
         for j in 0..labels.len() {
-            let prediction = get_prediction(final_weights, inputs[j]);
+            let prediction = get_prediction(final_weights, inputs[j], final_bias);
             let error = prediction - labels[j];
 
             // Compute gradients
             for m in 0..4 {
-                weight_gradient[m] = weight_gradient[m] + (inputs[j][m] * error);
+                weight_gradient[m] += (inputs[j][m] * error);
             }
-            bias_gradient = bias_gradient + error;
+            bias_gradient += error;
         }
 
         // Update weights and bias using the gradients
         for m in 0..4 {
-            final_weights[m] = final_weights[m] - (weight_gradient[m] * learning_rate * ratio);
+            final_weights[m] -= (weight_gradient[m] * learning_rate * ratio);
         }
-        final_bias = final_bias - (bias_gradient * learning_rate * ratio);
+        final_bias -= (bias_gradient * learning_rate * ratio);
     }
     (final_weights, final_bias)
 }

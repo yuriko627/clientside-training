@@ -1,5 +1,5 @@
 use std::ops::{Add, Sub, Mul};
-
+use std::cmp::Ordering;
 // Scale 2^-16 = 0.0000152587890625 (divide by 65536)
 // p = 21888242871839275222246405745257275088548364400416034343698204186575808495617
 
@@ -90,6 +90,42 @@ impl Mul for Quantized {
     }
 }
 
+fn is_negative(x: Field) -> bool {
+    let bytes = x.to_be_bytes();
+    let mut negative = false;
+
+    for i in 0..16 {
+        if bytes[i] != 0 {
+            negative = true;
+        }
+    }
+
+    negative
+}
+
+impl Ord for Quantized { // TODO is it cheaper to create a function that returns a bool directly?
+    fn cmp(self: Self, other: Self) -> Ordering {
+        if self.x == other.x {
+            Ordering::equal()
+        }
+
+        let self_negative = is_negative(self.x);
+        let other_negative = is_negative(other.x);
+
+        if (self_negative & !other_negative) {
+            Ordering::less()
+        } else if self_negative == other_negative {
+            let self_smallest = self.x.lt(other.x);
+            if self_smallest {
+                Ordering::less()
+            } else {
+                Ordering::greater()
+            }
+        } else {
+            Ordering::greater()
+        }
+    }
+}
 fn main(x: Field, y: pub Field) {
     assert(x != y);
 }

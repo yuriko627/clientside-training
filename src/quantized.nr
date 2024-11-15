@@ -16,8 +16,12 @@ struct Quantized {
 
 impl Quantized {
 
-    fn zero() -> Self {
+    pub fn zero() -> Self {
         Quantized { x: 0 }
+    }
+
+    pub fn new(x: Field) -> Self {
+        Self { x: x }
     }
 
     fn add(self: Self, other: Self) -> Self {

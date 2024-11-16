@@ -292,4 +292,20 @@ fn test_training() {
         Quantized { x: 0 },
         Quantized { x: 0 },
     ];
+
+    let epochs = 10;
+    let learning_rate = Quantized::new(6553); //0.1  0.1/2^-16 6553.6
+    let ratio = Quantized::new(2184); // 1/nr samples = 1/30 => (1/30)/2^-16 = 2184.53
+    let (final_weights, final_bias) = train(epochs, inputs, labels, learning_rate, ratio);
+    println(final_weights);
+    println(final_bias);
+    /*
+    epoch = 1: [Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffbfb0 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffd3dc }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffed27 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effffcda }]
+    Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effff336 }
+    epoch = 2: [Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffabc1 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffc638 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffe747 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effffbe6 }]
+    Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffef34 }
+    epoch = 10:
+    [Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efff7992 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffa3e1 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffd880 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effff981 }]
+    Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffe520 }
+    */
 }

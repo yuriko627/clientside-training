@@ -91,7 +91,7 @@ impl Mul for Quantized {
 }
 
 fn is_negative(x: Field) -> bool {
-    let bytes = x.to_be_bytes();
+    let bytes: [u8; 32] = x.to_be_bytes();
     let mut negative = false;
 
     for i in 0..16 {

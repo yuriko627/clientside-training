@@ -79,7 +79,7 @@ fn train(
 fn test_training() {
     let inputs = [
         [
-            Quantized { x: 334233 },
+            Quantized { x: 334234 },
             Quantized { x: 229376 },
             Quantized { x: 91750 },
             Quantized { x: 13107 },
@@ -93,18 +93,18 @@ fn test_training() {
         [
             Quantized { x: 308019 },
             Quantized { x: 209715 },
-            Quantized { x: 85196 },
+            Quantized { x: 85197 },
             Quantized { x: 13107 },
         ],
         [
-            Quantized { x: 301465 },
-            Quantized { x: 203161 },
+            Quantized { x: 301466 },
+            Quantized { x: 203162 },
             Quantized { x: 98304 },
             Quantized { x: 13107 },
         ],
         [
             Quantized { x: 327680 },
-            Quantized { x: 235929 },
+            Quantized { x: 235930 },
             Quantized { x: 91750 },
             Quantized { x: 13107 },
         ],
@@ -115,10 +115,10 @@ fn test_training() {
             Quantized { x: 26214 },
         ],
         [
-            Quantized { x: 301465 },
+            Quantized { x: 301466 },
             Quantized { x: 222822 },
             Quantized { x: 91750 },
-            Quantized { x: 19660 },
+            Quantized { x: 19661 },
         ],
         [
             Quantized { x: 327680 },
@@ -134,9 +134,9 @@ fn test_training() {
         ],
         [
             Quantized { x: 321126 },
-            Quantized { x: 203161 },
+            Quantized { x: 203162 },
             Quantized { x: 98304 },
-            Quantized { x: 6553 },
+            Quantized { x: 6554 },
         ],
         [
             Quantized { x: 353894 },
@@ -145,25 +145,25 @@ fn test_training() {
             Quantized { x: 13107 },
         ],
         [
-            Quantized { x: 314572 },
+            Quantized { x: 314573 },
             Quantized { x: 222822 },
-            Quantized { x: 104857 },
+            Quantized { x: 104858 },
             Quantized { x: 13107 },
         ],
         [
-            Quantized { x: 314572 },
+            Quantized { x: 314573 },
             Quantized { x: 196608 },
             Quantized { x: 91750 },
-            Quantized { x: 6553 },
+            Quantized { x: 6554 },
         ],
         [
-            Quantized { x: 281804 },
+            Quantized { x: 281805 },
             Quantized { x: 196608 },
-            Quantized { x: 72089 },
-            Quantized { x: 6553 },
+            Quantized { x: 72090 },
+            Quantized { x: 6554 },
         ],
         [
-            Quantized { x: 380108 },
+            Quantized { x: 380109 },
             Quantized { x: 262144 },
             Quantized { x: 78643 },
             Quantized { x: 13107 },
@@ -177,26 +177,26 @@ fn test_training() {
         [
             Quantized { x: 353894 },
             Quantized { x: 255590 },
-            Quantized { x: 85196 },
+            Quantized { x: 85197 },
             Quantized { x: 26214 },
         ],
         [
-            Quantized { x: 334233 },
+            Quantized { x: 334234 },
             Quantized { x: 229376 },
             Quantized { x: 91750 },
-            Quantized { x: 19660 },
+            Quantized { x: 19661 },
         ],
         [
             Quantized { x: 373555 },
-            Quantized { x: 249036 },
+            Quantized { x: 249037 },
             Quantized { x: 111411 },
-            Quantized { x: 19660 },
+            Quantized { x: 19661 },
         ],
         [
-            Quantized { x: 334233 },
-            Quantized { x: 249036 },
+            Quantized { x: 334234 },
+            Quantized { x: 249037 },
             Quantized { x: 98304 },
-            Quantized { x: 19660 },
+            Quantized { x: 19661 },
         ],
         [
             Quantized { x: 353894 },
@@ -205,25 +205,25 @@ fn test_training() {
             Quantized { x: 13107 },
         ],
         [
-            Quantized { x: 334233 },
+            Quantized { x: 334234 },
             Quantized { x: 242483 },
             Quantized { x: 98304 },
             Quantized { x: 26214 },
         ],
         [
-            Quantized { x: 301465 },
-            Quantized { x: 235929 },
+            Quantized { x: 301466 },
+            Quantized { x: 235930 },
             Quantized { x: 65536 },
             Quantized { x: 13107 },
         ],
         [
-            Quantized { x: 334233 },
-            Quantized { x: 216268 },
+            Quantized { x: 334234 },
+            Quantized { x: 216269 },
             Quantized { x: 111411 },
             Quantized { x: 32768 },
         ],
         [
-            Quantized { x: 314572 },
+            Quantized { x: 314573 },
             Quantized { x: 222822 },
             Quantized { x: 124518 },
             Quantized { x: 13107 },
@@ -231,13 +231,13 @@ fn test_training() {
         [
             Quantized { x: 327680 },
             Quantized { x: 196608 },
-            Quantized { x: 104857 },
+            Quantized { x: 104858 },
             Quantized { x: 13107 },
         ],
         [
             Quantized { x: 327680 },
             Quantized { x: 222822 },
-            Quantized { x: 104857 },
+            Quantized { x: 104858 },
             Quantized { x: 26214 },
         ],
         [
@@ -255,7 +255,7 @@ fn test_training() {
         [
             Quantized { x: 308019 },
             Quantized { x: 209715 },
-            Quantized { x: 104857 },
+            Quantized { x: 104858 },
             Quantized { x: 13107 },
         ],
     ];
@@ -293,20 +293,43 @@ fn test_training() {
         Quantized { x: 0 },
     ];
 
-    let epochs = 10;
-    let learning_rate = Quantized::new(6553); //0.1  0.1/2^-16 6553.6
-    let ratio = Quantized::new(2184); // 1/nr samples = 1/30 => (1/30)/2^-16 = 2184.53
+    let epochs = 100;
+    let learning_rate = Quantized::new(6554); //0.1  0.1/2^-16 6553.6
+    let ratio = Quantized::new(2185); // 1/nr samples = 1/30 => (1/30)/2^-16 = 2184.53
     let (final_weights, final_bias) = train(epochs, inputs, labels, learning_rate, ratio);
     println(final_weights);
     println(final_bias);
+    // p = 21888242871839275222246405745257275088548364400416034343698204186575808495617
     /*
-    epoch = 1: [Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffbfb0 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffd3dc }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffed27 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effffcda }]
-    Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effff336 }
-    epoch = 2: [Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffabc1 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffc638 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffe747 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effffbe6 }]
-    Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffef34 }
-    epoch = 10:
-    [Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efff7992 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffa3e1 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffd880 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effff981 }]
-    Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffe520 }
+    epoch = 10
+    [Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efff798a }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffa3dd }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffd87e }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effff980 }]
+    Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffe51d }
+    weights
+    21888242871839275222246405745257275088548364400416034343698204186575808461194
+    21888242871839275222246405745257275088548364400416034343698204186575808472029
+    21888242871839275222246405745257275088548364400416034343698204186575808485502
+    21888242871839275222246405745257275088548364400416034343698204186575808493952
+    converted:
+    (21888242871839275222246405745257275088548364400416034343698204186575808495617- 21888242871839275222246405745257275088548364400416034343698204186575808461194) / 2^16
+    -0.5252532958984375
+    (21888242871839275222246405745257275088548364400416034343698204186575808495617-21888242871839275222246405745257275088548364400416034343698204186575808472029) / 2^16
+    -0.35992431640625
+    (21888242871839275222246405745257275088548364400416034343698204186575808495617-21888242871839275222246405745257275088548364400416034343698204186575808485502) / 2^16
+    -0.1543426513671875
+    (21888242871839275222246405745257275088548364400416034343698204186575808495617-21888242871839275222246405745257275088548364400416034343698204186575808493952) / 2^16
+    -0.0254058837890625
+    [-0.5252532958984375, -0.35992431640625, -0.1543426513671875, -0.0254058837890625]
+    In Rust for same samples and #epochs
+    [-0.5252033301021997, -0.3599251494270883, -0.15437820313086892, -0.02547627906962113]
+    Bias Noir
+    21888242871839275222246405745257275088548364400416034343698204186575808488733
+    converted:
+    (21888242871839275222246405745257275088548364400416034343698204186575808495617- 21888242871839275222246405745257275088548364400416034343698204186575808488733) / 2^16
+    -0.10504150390625
+    Rust: -0.1050845195834892
+    */
+    /*
+    epoch = 100
     */
 }
 

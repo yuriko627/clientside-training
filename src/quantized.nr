@@ -131,6 +131,67 @@ fn main(x: Field, y: pub Field) {
 }
 
 #[test]
+fn test_order() {
+    // Test 1: comparison between positive and negative value.
+    // a = 0.2 and b = -0.2
+    let a: Field = 13107;
+    let a_quantized = Quantized { x: a };
+    let b = 21888242871839275222246405745257275088548364400416034343698204186575808482510;
+    let b_quantized = Quantized { x: b };
+    assert(a_quantized > b_quantized);
+
+    // Test 2: comparison between two possitive numbers.
+    // a = 1 and b = 0.2.
+    // Then a * 2^16 = 65536
+    let a: Field = 65536;
+    let a_quantized = Quantized { x: a };
+    let b = 13107;
+    let b_quantized = Quantized { x: b };
+    assert(a_quantized > b_quantized);
+
+    // Test 3: comparison between two possitive numbers where the roles are
+    // inverted.
+    // a = 1 and b = 1.2.
+    // Then a * 2^16 = 65536
+    let a: Field = 65536;
+    let a_quantized = Quantized { x: a };
+    let b = 78643;
+    let b_quantized = Quantized { x: b };
+    assert(a_quantized < b_quantized);
+
+    // Test 4: comparison between two negative numbers.
+    // a = -1 and b = -0.2.
+    // Then a * 2^16 = -65536 therefore taking mod p we obtain that
+    // a = 21888242871839275222246405745257275088548364400416034343698204186575808430081
+    // b = 21888242871839275222246405745257275088548364400416034343698204186575808482510
+    let a: Field = 21888242871839275222246405745257275088548364400416034343698204186575808430081;
+    let a_quantized = Quantized { x: a };
+    let b = 21888242871839275222246405745257275088548364400416034343698204186575808482510;
+    let b_quantized = Quantized { x: b };
+    assert(a_quantized < b_quantized);
+}
+
+#[test]
+fn test_is_negative() {
+    // Test 1: checking if it's negative for a positive value.
+    // a = 0.2   =>   0.2 * 2^16 = 13107
+    let a: Field = 13107;
+    assert(!is_negative(a));
+
+    // Test 2: checking if it's negative for a negative value.
+    // a = -0.2  =>   -0.2 * 2^16 = -13107
+    // Hence, -13107 mod p = p - 13107 = 21888242871839275222246405745257275088548364400416034343698204186575808482510
+    let a = 21888242871839275222246405745257275088548364400416034343698204186575808482510;
+    assert(is_negative(a));
+
+    // Test 3: checing if it's negative for a negative larger value.
+    // a = -1301.34  =>  -1301.34 * 2^16 = -85284618
+    // Hence, -85284618 mod p = p - 85284618 = 21888242871839275222246405745257275088548364400416034343698204186575723210999
+    let a = 21888242871839275222246405745257275088548364400416034343698204186575723210999;
+    assert(is_negative(a));
+}
+
+#[test]
 fn test_add() {
     // Max value 2^60-1, positive and negative
     let a = 1152921504606846975;
@@ -233,4 +294,38 @@ fn test_mul() {
     let mult5_quantized = a5_quantized * b5_quantized;
     // Expected result: 12207.03125
     assert(mult5_quantized.x == 12207);
+}
+
+#[test]
+fn test_sub() {
+    let a = 1152921504606846975;
+    let b = 1152921504606846975;
+    let a_quantized = Quantized { x: a };
+    let b_quantized = Quantized { x: b };
+    let addition_quantized = a_quantized - b_quantized;
+    assert(addition_quantized.x == 0);
+
+    let a1 = 1152921504606846975;
+    let b1 = 0;
+    let a1_quantized = Quantized { x: a1 };
+    let b1_quantized = Quantized { x: b1 };
+    let addition1_quantized = a1_quantized - b1_quantized;
+    assert(addition1_quantized.x == a1);
+
+    let a1 = 1152921504606846975;
+    let b1 = 0;
+    let a1_quantized = Quantized { x: a1 };
+    let b1_quantized = Quantized { x: b1 };
+    let addition1_quantized = b1_quantized - a1_quantized;
+    // The result should be -a1, which means it is p - a1 in the field because
+    // of the wrap around.
+    let result = 21888242871839275222246405745257275088548364400416034343697051265071201648642;
+    assert(addition1_quantized.x == result);
+
+    let a2 = 12345;
+    let b2 = 67890;
+    let a2_quantized = Quantized { x: a2 };
+    let b2_quantized = Quantized { x: b2 };
+    let addition2_quantized = a2_quantized + b2_quantized;
+    assert(addition2_quantized.x == (a2 + b2));
 }

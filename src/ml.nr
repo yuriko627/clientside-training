@@ -1,7 +1,7 @@
 use crate::quantized::Quantized;
 
 fn approx_sigmoid(x: Quantized) -> Quantized {
-    // TODO implement // https://github.com/data61/MP-SPDZ/blob/master/Compiler/ml.py#L110
+    // Follows https://github.com/data61/MP-SPDZ/blob/master/Compiler/ml.py#L110
     // [-5, -2.5, 2.5, 5]
     let cuts: [Quantized; 4] = [
         Quantized::new(-327680), // -5/2^-16, -327680
@@ -308,4 +308,37 @@ fn test_training() {
     [Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efff7992 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffa3e1 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffd880 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effff981 }]
     Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffe520 }
     */
+}
+
+#[test]
+fn test_approx_sigmoid() {
+    // Testvalues: 1.0, 0.1, -0.5, -1.1
+    // Input 1.0, should return 0.67
+    // Quantized values:
+    // 1 / 2^-16 = 65536
+    // 0.67 / 2^-16 = 43909.1
+    let x = Quantized::new(65536);
+    let res = approx_sigmoid(x);
+    println(res); // 43909 exact answer!
+    // Input 0.1, should return 0.517
+    // Quantized values:
+    // 0.1 / 2^-16 = 6553.6 => round to 6554
+    // 0.517 / 2^-16 =  33882.112
+    let x2 = Quantized::new(6554);
+    let res2 = approx_sigmoid(x2);
+    println(res2); // 33882
+    // Input -0.5, should return 0.415
+    // Quantized values:
+    // -0.5 / 2^-16 = -32768
+    // 0.415 / 2^-16 = 27197.44
+    let x3 = Quantized::new(-32768);
+    let res3 = approx_sigmoid(x3);
+    println(res3); // 27198 differs by 1, due to loss of accuracy
+    // Input -1.1, should return 0.31299999999999994
+    // Quantized values:
+    // -1.1 / 2^-16 = -72089.6 => round to -72090
+    // 0.31299999999999994 / 2^-16 = 20512.7679
+    let x4 = Quantized::new(-72090);
+    let res4 = approx_sigmoid(x4);
+    println(res4); // 20513 differs by 1, due to loss of accuracy
 }

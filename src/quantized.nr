@@ -11,7 +11,11 @@ pub struct Quantized {
     // 2^60-1 = 1152921504606846975
     // -1152921504606846975 <= x <= 1152921504606846975
     // -1152921504606846975/65536 <= value <= 1152921504606846975/65536
-    x: Field,
+    pub x: Field,
+}
+
+unconstrained fn get_bytes(x: Field) -> [u8; 32] {
+    x.to_be_bytes()
 }
 
 impl Quantized {
@@ -34,7 +38,12 @@ impl Quantized {
 
     fn mul(self: Self, other: Self) -> Self {
         let mut temp: Field = self.x * other.x;
-        let mut bytes: [u8; 32] = temp.to_be_bytes();
+        let mut bytes: [u8; 32] = [0; 32];
+        unsafe {
+            bytes = get_bytes(temp);
+        }
+
+        assert(Field::from_be_bytes::<32>(bytes) == temp);
 
         // check if there are bytes from 0-15, then it is negative
         // This assumes the values that are multiplied have max ~60-63 bits
@@ -50,7 +59,11 @@ impl Quantized {
             temp = 21888242871839275222246405745257275088548364400416034343698204186575808495616
                 - temp
                 + 1;
-            bytes = temp.to_be_bytes();
+            unsafe {
+                bytes = get_bytes(temp);
+            }
+
+            assert(Field::from_be_bytes::<32>(bytes) == temp);
         }
 
         // Chop off 2 bytes to scale down by 2^16 and truncate

@@ -10,11 +10,12 @@ fn approx_sigmoid(x: Quantized) -> Quantized {
         Quantized::new(327680), // 327680
     ];
 
+    let temp = Quantized::new(1819) * x;
     let outputs = [
         Quantized::new(6), // 0.0001, 0.0001 / 2^-16 = 6.5536
-        (Quantized::new(1819) * x) + Quantized::new(9502), //0.02776 and 0.145, 0.02776 / 2^-16 = 1819.27936, 0.145/2^-16 = 9502.72
+        temp + Quantized::new(9502), //0.02776 and 0.145, 0.02776 / 2^-16 = 1819.27936, 0.145/2^-16 = 9502.72
         (Quantized::new(11141) * x) + Quantized::new(32768), //0.17 and 0.5, 0.17 / 2^-16 = 11141.12, 0.5/2^-16 = 32768
-        (Quantized::new(1819) * x) + Quantized::new(56031), //0.02776 and 0.85498, 0.85498/2^-16 = 56031.96928
+        temp + Quantized::new(56031), //0.02776 and 0.85498, 0.85498/2^-16 = 56031.96928
         Quantized::new(65529), //0.9999 / 2^-16 = 65529.4464
     ];
 
@@ -41,7 +42,7 @@ fn get_prediction(weights: [Quantized; 4], inputs: [Quantized; 4], bias: Quantiz
     approx_sigmoid(z + bias)
 }
 
-fn train(
+pub fn train(
     epochs: u64,
     inputs: [[Quantized; 4]; 30],
     labels: [Quantized],
@@ -293,7 +294,7 @@ fn test_training() {
         Quantized { x: 0 },
     ];
 
-    let epochs = 100;
+    let epochs = 10;
     let learning_rate = Quantized::new(6554); //0.1  0.1/2^-16 6553.6
     let ratio = Quantized::new(2185); // 1/nr samples = 1/30 => (1/30)/2^-16 = 2184.53
     let (final_weights, final_bias) = train(epochs, inputs, labels, learning_rate, ratio);

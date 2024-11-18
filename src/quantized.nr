@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 // Scale 2^-16 = 0.0000152587890625 (divide by 65536)
 // p = 21888242871839275222246405745257275088548364400416034343698204186575808495617
 
-struct Quantized {
+pub struct Quantized {
     // if value positive: x*scale
     // if negative: (p-x)*scale, where p is the prime of native Field (in this case from barretenberg)
     // the original value is max 60 bits, positive or negative,

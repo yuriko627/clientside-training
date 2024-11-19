@@ -1,5 +1,7 @@
 use std::ops::{Add, Sub, Mul};
 use std::cmp::Ordering;
+use std::field::bn254::decompose;
+
 // Scale 2^-16 = 0.0000152587890625 (divide by 65536)
 // p = 21888242871839275222246405745257275088548364400416034343698204186575808495617
 
@@ -99,42 +101,15 @@ impl Mul for Quantized {
 /// Check if the integer value is possitive based on the Field value used to
 /// encode it.
 pub fn is_positive(x: Field) -> bool {
-    let mut bytes: [u8; 32] = [0; 32];
-    unsafe {
-        bytes = get_bytes(x);
-    }
-
-    assert(Field::from_be_bytes::<32>(bytes) == x);
-
-    let mut upper_bytes = [0; 32];
-
-    for i in 0..16 {
-        upper_bytes[i] = bytes[i];
-    }
-    let possitive_check = Field::from_be_bytes::<32>(upper_bytes);
-
-    possitive_check == 0
+    let (_, higher_bytes) = decompose(x);
+    higher_bytes == 0
 }
 
 // check if there are bytes from 0-15, then it is negative
 // This assumes the values that are multiplied have max ~60-63 bits
 pub fn is_negative(x: Field) -> bool {
-    let mut bytes: [u8; 32] = [0; 32];
-    unsafe {
-        bytes = get_bytes(x);
-    }
-
-    assert(Field::from_be_bytes::<32>(bytes) == x);
-
-    //TODO adjust bytes, setting 16-32 to zero. Does this give an improvement?
-    let mut upper_bytes = [0; 32];
-
-    for i in 0..16 {
-        upper_bytes[i] = bytes[i];
-    }
-    let negative_check = Field::from_be_bytes::<32>(upper_bytes);
-
-    negative_check != 0
+    let (_, higher_bytes) = decompose(x);
+    higher_bytes != 0
 }
 
 impl Ord for Quantized { // TODO is it cheaper to create a function that returns a bool directly?

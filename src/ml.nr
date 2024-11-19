@@ -328,7 +328,7 @@ fn test_training() {
         Quantized { x: 0 },
     ];
 
-    let epochs = 10;
+    let epochs = 100;
     let learning_rate = Quantized::new(6554); //0.1  0.1/2^-16 6553.6
     let ratio = Quantized::new(2185); // 1/nr samples = 1/30 => (1/30)/2^-16 = 2184.53
     let (final_weights, final_bias) = train(epochs, inputs, labels, learning_rate, ratio);
@@ -365,6 +365,8 @@ fn test_training() {
     */
     /*
     epoch = 100
+    [Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efff4ecb }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efff86e6 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffcbf3 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effff7ee }]
+    Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffdc2c }
     */
 }
 

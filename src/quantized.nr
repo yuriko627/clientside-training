@@ -14,7 +14,7 @@ pub struct Quantized {
     pub x: Field,
 }
 
-unconstrained fn get_bytes(x: Field) -> [u8; 32] {
+pub unconstrained fn get_bytes(x: Field) -> [u8; 32] {
     x.to_be_bytes()
 }
 

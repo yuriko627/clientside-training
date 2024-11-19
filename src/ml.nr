@@ -1,4 +1,4 @@
-use crate::quantized::Quantized;
+use crate::quantized::{Quantized, get_bytes};
 
 fn approx_sigmoid(x: Quantized) -> Quantized {
     // Follows https://github.com/data61/MP-SPDZ/blob/master/Compiler/ml.py#L110
@@ -10,11 +10,12 @@ fn approx_sigmoid(x: Quantized) -> Quantized {
         Quantized::new(327680), // 327680
     ];
 
+    let temp = Quantized::new(1819) * x;
     let outputs = [
         Quantized::new(6), // 0.0001, 0.0001 / 2^-16 = 6.5536
-        (Quantized::new(1819) * x) + Quantized::new(9502), //0.02776 and 0.145, 0.02776 / 2^-16 = 1819.27936, 0.145/2^-16 = 9502.72
+        temp + Quantized::new(9502), //0.02776 and 0.145, 0.02776 / 2^-16 = 1819.27936, 0.145/2^-16 = 9502.72
         (Quantized::new(11141) * x) + Quantized::new(32768), //0.17 and 0.5, 0.17 / 2^-16 = 11141.12, 0.5/2^-16 = 32768
-        (Quantized::new(1819) * x) + Quantized::new(56031), //0.02776 and 0.85498, 0.85498/2^-16 = 56031.96928
+        temp + Quantized::new(56031), //0.02776 and 0.85498, 0.85498/2^-16 = 56031.96928
         Quantized::new(65529), //0.9999 / 2^-16 = 65529.4464
     ];
 
@@ -34,14 +35,48 @@ fn approx_sigmoid(x: Quantized) -> Quantized {
 
 fn get_prediction(weights: [Quantized; 4], inputs: [Quantized; 4], bias: Quantized) -> Quantized {
     // let z = weights dot_product inputs
-    let mut z = Quantized::zero();
+    let mut z = 0;
     for i in 0..4 {
-        z += weights[i] * inputs[i];
+      // Perform operations directly on Field elements, scale down at the end
+        z += weights[i].x * inputs[i].x;
     }
-    approx_sigmoid(z + bias)
+    let mut bytes: [u8; 32] = [0; 32];
+    unsafe {
+        bytes = get_bytes(z);
+    }
+    assert(Field::from_be_bytes::<32>(bytes) == z);
+    let mut negative = false;
+
+    for i in 0..16 {
+        if bytes[i] != 0 {
+            negative = true;
+        }
+    }
+    if negative {
+        z = 21888242871839275222246405745257275088548364400416034343698204186575808495616 - z + 1;
+        unsafe {
+            bytes = get_bytes(z);
+        }
+
+        assert(Field::from_be_bytes::<32>(bytes) == z);
+    }
+    // Now scale down with the same trick as in Quantized mul
+    let mut truncated: [u8; 32] = [0; 32];
+    for i in 0..30 {
+        truncated[i + 2] = bytes[i];
+    }
+
+    let mut new_x: Field = Field::from_be_bytes::<32>(truncated);
+    // Flip back sign if the output is negative
+    if negative {
+        new_x = 21888242871839275222246405745257275088548364400416034343698204186575808495616
+            - new_x
+            + 1;
+    }
+    approx_sigmoid(Quantized { x: new_x } + bias)
 }
 
-fn train(
+pub fn train(
     epochs: u64,
     inputs: [[Quantized; 4]; 30],
     labels: [Quantized],
@@ -330,6 +365,8 @@ fn test_training() {
     */
     /*
     epoch = 100
+    [Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efff4ecb }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efff86e6 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffcbf3 }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593effff7ee }]
+    Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffdc2c }
     */
 }
 

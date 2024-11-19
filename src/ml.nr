@@ -1,4 +1,4 @@
-use crate::quantized::{Quantized, get_bytes};
+use crate::quantized::{Quantized, get_bytes, is_negative};
 
 fn approx_sigmoid(x: Quantized) -> Quantized {
     // Follows https://github.com/data61/MP-SPDZ/blob/master/Compiler/ml.py#L110
@@ -45,13 +45,8 @@ fn get_prediction(weights: [Quantized; 4], inputs: [Quantized; 4], bias: Quantiz
         bytes = get_bytes(z);
     }
     assert(Field::from_be_bytes::<32>(bytes) == z);
-    let mut negative = false;
+    let negative = is_negative(z);
 
-    for i in 0..16 {
-        if bytes[i] != 0 {
-            negative = true;
-        }
-    }
     if negative {
         z = 21888242871839275222246405745257275088548364400416034343698204186575808495616 - z + 1;
         unsafe {

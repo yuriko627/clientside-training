@@ -45,15 +45,8 @@ impl Quantized {
 
         assert(Field::from_be_bytes::<32>(bytes) == temp);
 
-        // check if there are bytes from 0-15, then it is negative
-        // This assumes the values that are multiplied have max ~60-63 bits
-        let mut negative = false;
+        let negative = is_negative(temp);
 
-        for i in 0..16 {
-            if bytes[i] != 0 {
-                negative = true;
-            }
-        }
         // To correctly scale down we temporary flip the sign
         if negative {
             temp = 21888242871839275222246405745257275088548364400416034343698204186575808495616
@@ -103,7 +96,9 @@ impl Mul for Quantized {
     }
 }
 
-fn is_negative(x: Field) -> bool {
+// check if there are bytes from 0-15, then it is negative
+// This assumes the values that are multiplied have max ~60-63 bits
+pub fn is_negative(x: Field) -> bool {
     let mut bytes: [u8; 32] = [0; 32];
     unsafe {
         bytes = get_bytes(x);
@@ -111,15 +106,15 @@ fn is_negative(x: Field) -> bool {
 
     assert(Field::from_be_bytes::<32>(bytes) == x);
 
-    let mut negative = false;
+//TODO adjust bytes, setting 16-32 to zero. Does this give an improvement?
+    let mut upper_bytes = [0; 32];
 
     for i in 0..16 {
-        if bytes[i] != 0 {
-            negative = true;
-        }
+        upper_bytes[i] = bytes[i];
     }
+    let negative_check = Field::from_be_bytes::<32>(upper_bytes);
 
-    negative
+    negative_check != 0
 }
 
 impl Ord for Quantized { // TODO is it cheaper to create a function that returns a bool directly?

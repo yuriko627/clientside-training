@@ -96,6 +96,26 @@ impl Mul for Quantized {
     }
 }
 
+/// Check if the integer value is possitive based on the Field value used to
+/// encode it.
+pub fn is_positive(x: Field) -> bool {
+    let mut bytes: [u8; 32] = [0; 32];
+    unsafe {
+        bytes = get_bytes(x);
+    }
+
+    assert(Field::from_be_bytes::<32>(bytes) == x);
+
+    let mut upper_bytes = [0; 32];
+
+    for i in 0..16 {
+        upper_bytes[i] = bytes[i];
+    }
+    let possitive_check = Field::from_be_bytes::<32>(upper_bytes);
+
+    possitive_check == 0
+}
+
 // check if there are bytes from 0-15, then it is negative
 // This assumes the values that are multiplied have max ~60-63 bits
 pub fn is_negative(x: Field) -> bool {
@@ -106,7 +126,7 @@ pub fn is_negative(x: Field) -> bool {
 
     assert(Field::from_be_bytes::<32>(bytes) == x);
 
-//TODO adjust bytes, setting 16-32 to zero. Does this give an improvement?
+    //TODO adjust bytes, setting 16-32 to zero. Does this give an improvement?
     let mut upper_bytes = [0; 32];
 
     for i in 0..16 {
@@ -123,12 +143,12 @@ impl Ord for Quantized { // TODO is it cheaper to create a function that returns
             Ordering::equal()
         }
 
-        let self_negative = is_negative(self.x);
-        let other_negative = is_negative(other.x);
+        let self_positive = is_positive(self.x);
+        let other_positive = is_positive(other.x);
 
-        if (self_negative & !other_negative) {
-            Ordering::less()
-        } else if self_negative == other_negative {
+        if (self_positive & !other_positive) {
+            Ordering::greater()
+        } else if self_positive == other_positive {
             let self_smallest = self.x.lt(other.x);
             if self_smallest {
                 Ordering::less()
@@ -136,7 +156,7 @@ impl Ord for Quantized { // TODO is it cheaper to create a function that returns
                 Ordering::greater()
             }
         } else {
-            Ordering::greater()
+            Ordering::less()
         }
     }
 }

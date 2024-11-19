@@ -37,7 +37,7 @@ fn get_prediction(weights: [Quantized; 4], inputs: [Quantized; 4], bias: Quantiz
     // let z = weights dot_product inputs
     let mut z = 0;
     for i in 0..4 {
-      // Perform operations directly on Field elements, scale down at the end
+        // Perform operations directly on Field elements, scale down at the end
         z += weights[i].x * inputs[i].x;
     }
     let mut bytes: [u8; 32] = [0; 32];

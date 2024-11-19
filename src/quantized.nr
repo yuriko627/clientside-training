@@ -104,7 +104,13 @@ impl Mul for Quantized {
 }
 
 fn is_negative(x: Field) -> bool {
-    let bytes: [u8; 32] = x.to_be_bytes();
+    let mut bytes: [u8; 32] = [0; 32];
+    unsafe {
+        bytes = get_bytes(x);
+    }
+
+    assert(Field::from_be_bytes::<32>(bytes) == x);
+
     let mut negative = false;
 
     for i in 0..16 {

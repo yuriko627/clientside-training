@@ -1,5 +1,7 @@
 use std::ops::{Add, Sub, Mul};
 use std::cmp::Ordering;
+use std::field::bn254::decompose;
+
 // Scale 2^-16 = 0.0000152587890625 (divide by 65536)
 // p = 21888242871839275222246405745257275088548364400416034343698204186575808495617
 
@@ -45,15 +47,8 @@ impl Quantized {
 
         assert(Field::from_be_bytes::<32>(bytes) == temp);
 
-        // check if there are bytes from 0-15, then it is negative
-        // This assumes the values that are multiplied have max ~60-63 bits
-        let mut negative = false;
+        let negative = is_negative(temp);
 
-        for i in 0..16 {
-            if bytes[i] != 0 {
-                negative = true;
-            }
-        }
         // To correctly scale down we temporary flip the sign
         if negative {
             temp = 21888242871839275222246405745257275088548364400416034343698204186575808495616
@@ -103,23 +98,18 @@ impl Mul for Quantized {
     }
 }
 
-fn is_negative(x: Field) -> bool {
-    let mut bytes: [u8; 32] = [0; 32];
-    unsafe {
-        bytes = get_bytes(x);
-    }
+/// Check if the integer value is possitive based on the Field value used to
+/// encode it.
+pub fn is_positive(x: Field) -> bool {
+    let (_, higher_bytes) = decompose(x);
+    higher_bytes == 0
+}
 
-    assert(Field::from_be_bytes::<32>(bytes) == x);
-
-    let mut negative = false;
-
-    for i in 0..16 {
-        if bytes[i] != 0 {
-            negative = true;
-        }
-    }
-
-    negative
+// check if there are bytes from 0-15, then it is negative
+// This assumes the values that are multiplied have max ~60-63 bits
+pub fn is_negative(x: Field) -> bool {
+    let (_, higher_bytes) = decompose(x);
+    higher_bytes != 0
 }
 
 impl Ord for Quantized { // TODO is it cheaper to create a function that returns a bool directly?
@@ -128,12 +118,12 @@ impl Ord for Quantized { // TODO is it cheaper to create a function that returns
             Ordering::equal()
         }
 
-        let self_negative = is_negative(self.x);
-        let other_negative = is_negative(other.x);
+        let self_positive = is_positive(self.x);
+        let other_positive = is_positive(other.x);
 
-        if (self_negative & !other_negative) {
-            Ordering::less()
-        } else if self_negative == other_negative {
+        if (self_positive & !other_positive) {
+            Ordering::greater()
+        } else if self_positive == other_positive {
             let self_smallest = self.x.lt(other.x);
             if self_smallest {
                 Ordering::less()
@@ -141,7 +131,7 @@ impl Ord for Quantized { // TODO is it cheaper to create a function that returns
                 Ordering::greater()
             }
         } else {
-            Ordering::greater()
+            Ordering::less()
         }
     }
 }

@@ -1,4 +1,4 @@
-use crate::quantized::{Quantized, get_bytes};
+use crate::quantized::{Quantized, get_bytes, is_negative};
 
 fn approx_sigmoid(x: Quantized) -> Quantized {
     // Follows https://github.com/data61/MP-SPDZ/blob/master/Compiler/ml.py#L110
@@ -37,7 +37,7 @@ fn get_prediction(weights: [Quantized; 4], inputs: [Quantized; 4], bias: Quantiz
     // let z = weights dot_product inputs
     let mut z = 0;
     for i in 0..4 {
-      // Perform operations directly on Field elements, scale down at the end
+        // Perform operations directly on Field elements, scale down at the end
         z += weights[i].x * inputs[i].x;
     }
     let mut bytes: [u8; 32] = [0; 32];
@@ -45,13 +45,8 @@ fn get_prediction(weights: [Quantized; 4], inputs: [Quantized; 4], bias: Quantiz
         bytes = get_bytes(z);
     }
     assert(Field::from_be_bytes::<32>(bytes) == z);
-    let mut negative = false;
+    let negative = is_negative(z);
 
-    for i in 0..16 {
-        if bytes[i] != 0 {
-            negative = true;
-        }
-    }
     if negative {
         z = 21888242871839275222246405745257275088548364400416034343698204186575808495616 - z + 1;
         unsafe {
@@ -114,16 +109,58 @@ pub fn train(
 fn test_training() {
     let inputs = [
         [
-            Quantized { x: 334234 },
-            Quantized { x: 229376 },
+            Quantized { x: 360448 },
+            Quantized { x: 170394 },
+            Quantized { x: 288358 },
+            Quantized { x: 78643 },
+        ],
+        [
+            Quantized { x: 327680 },
+            Quantized { x: 222822 },
+            Quantized { x: 104858 },
+            Quantized { x: 26214 },
+        ],
+        [
+            Quantized { x: 340787 },
+            Quantized { x: 268698 },
+            Quantized { x: 98304 },
+            Quantized { x: 6554 },
+        ],
+        [
+            Quantized { x: 425984 },
+            Quantized { x: 183501 },
+            Quantized { x: 301466 },
+            Quantized { x: 98304 },
+        ],
+        [
+            Quantized { x: 367002 },
+            Quantized { x: 196608 },
+            Quantized { x: 294912 },
+            Quantized { x: 98304 },
+        ],
+        [
+            Quantized { x: 301466 },
+            Quantized { x: 209715 },
             Quantized { x: 91750 },
             Quantized { x: 13107 },
         ],
         [
-            Quantized { x: 321126 },
-            Quantized { x: 196608 },
-            Quantized { x: 91750 },
+            Quantized { x: 393216 },
+            Quantized { x: 144179 },
+            Quantized { x: 262144 },
+            Quantized { x: 65536 },
+        ],
+        [
+            Quantized { x: 334234 },
+            Quantized { x: 222822 },
+            Quantized { x: 98304 },
             Quantized { x: 13107 },
+        ],
+        [
+            Quantized { x: 432538 },
+            Quantized { x: 190054 },
+            Quantized { x: 301466 },
+            Quantized { x: 85197 },
         ],
         [
             Quantized { x: 308019 },
@@ -132,70 +169,34 @@ fn test_training() {
             Quantized { x: 13107 },
         ],
         [
-            Quantized { x: 301466 },
-            Quantized { x: 203162 },
-            Quantized { x: 98304 },
-            Quantized { x: 13107 },
-        ],
-        [
-            Quantized { x: 327680 },
-            Quantized { x: 235930 },
-            Quantized { x: 91750 },
-            Quantized { x: 13107 },
-        ],
-        [
-            Quantized { x: 353894 },
-            Quantized { x: 255590 },
-            Quantized { x: 111411 },
-            Quantized { x: 26214 },
-        ],
-        [
-            Quantized { x: 301466 },
-            Quantized { x: 222822 },
-            Quantized { x: 91750 },
-            Quantized { x: 19661 },
-        ],
-        [
-            Quantized { x: 327680 },
-            Quantized { x: 222822 },
-            Quantized { x: 98304 },
-            Quantized { x: 13107 },
-        ],
-        [
-            Quantized { x: 288358 },
-            Quantized { x: 190054 },
-            Quantized { x: 91750 },
-            Quantized { x: 13107 },
-        ],
-        [
-            Quantized { x: 321126 },
-            Quantized { x: 203162 },
-            Quantized { x: 98304 },
-            Quantized { x: 6554 },
-        ],
-        [
-            Quantized { x: 353894 },
-            Quantized { x: 242483 },
-            Quantized { x: 98304 },
-            Quantized { x: 13107 },
-        ],
-        [
-            Quantized { x: 314573 },
-            Quantized { x: 222822 },
+            Quantized { x: 412877 },
+            Quantized { x: 216269 },
+            Quantized { x: 308019 },
             Quantized { x: 104858 },
+        ],
+        [
+            Quantized { x: 340787 },
+            Quantized { x: 222822 },
+            Quantized { x: 91750 },
             Quantized { x: 13107 },
         ],
         [
-            Quantized { x: 314573 },
-            Quantized { x: 196608 },
-            Quantized { x: 91750 },
-            Quantized { x: 6554 },
+            Quantized { x: 380109 },
+            Quantized { x: 170394 },
+            Quantized { x: 262144 },
+            Quantized { x: 78643 },
         ],
         [
-            Quantized { x: 281805 },
-            Quantized { x: 196608 },
-            Quantized { x: 72090 },
-            Quantized { x: 6554 },
+            Quantized { x: 399770 },
+            Quantized { x: 183501 },
+            Quantized { x: 262144 },
+            Quantized { x: 85197 },
+        ],
+        [
+            Quantized { x: 373555 },
+            Quantized { x: 183501 },
+            Quantized { x: 268698 },
+            Quantized { x: 85197 },
         ],
         [
             Quantized { x: 380109 },
@@ -204,64 +205,52 @@ fn test_training() {
             Quantized { x: 13107 },
         ],
         [
-            Quantized { x: 373555 },
-            Quantized { x: 288358 },
-            Quantized { x: 98304 },
-            Quantized { x: 26214 },
-        ],
-        [
-            Quantized { x: 353894 },
-            Quantized { x: 255590 },
-            Quantized { x: 85197 },
-            Quantized { x: 26214 },
-        ],
-        [
-            Quantized { x: 334234 },
-            Quantized { x: 229376 },
-            Quantized { x: 91750 },
-            Quantized { x: 19661 },
-        ],
-        [
-            Quantized { x: 373555 },
-            Quantized { x: 249037 },
-            Quantized { x: 111411 },
-            Quantized { x: 19661 },
-        ],
-        [
-            Quantized { x: 334234 },
-            Quantized { x: 249037 },
-            Quantized { x: 98304 },
-            Quantized { x: 19661 },
-        ],
-        [
-            Quantized { x: 353894 },
-            Quantized { x: 222822 },
-            Quantized { x: 111411 },
-            Quantized { x: 13107 },
-        ],
-        [
-            Quantized { x: 334234 },
-            Quantized { x: 242483 },
-            Quantized { x: 98304 },
-            Quantized { x: 26214 },
-        ],
-        [
-            Quantized { x: 301466 },
-            Quantized { x: 235930 },
-            Quantized { x: 65536 },
-            Quantized { x: 13107 },
-        ],
-        [
-            Quantized { x: 334234 },
-            Quantized { x: 216269 },
-            Quantized { x: 111411 },
-            Quantized { x: 32768 },
-        ],
-        [
             Quantized { x: 314573 },
             Quantized { x: 222822 },
             Quantized { x: 124518 },
             Quantized { x: 13107 },
+        ],
+        [
+            Quantized { x: 367002 },
+            Quantized { x: 196608 },
+            Quantized { x: 294912 },
+            Quantized { x: 98304 },
+        ],
+        [
+            Quantized { x: 321126 },
+            Quantized { x: 196608 },
+            Quantized { x: 91750 },
+            Quantized { x: 13107 },
+        ],
+        [
+            Quantized { x: 373555 },
+            Quantized { x: 249037 },
+            Quantized { x: 111411 },
+            Quantized { x: 19661 },
+        ],
+        [
+            Quantized { x: 327680 },
+            Quantized { x: 216269 },
+            Quantized { x: 91750 },
+            Quantized { x: 13107 },
+        ],
+        [
+            Quantized { x: 406323 },
+            Quantized { x: 190054 },
+            Quantized { x: 281805 },
+            Quantized { x: 85197 },
+        ],
+        [
+            Quantized { x: 334234 },
+            Quantized { x: 249037 },
+            Quantized { x: 124518 },
+            Quantized { x: 26214 },
+        ],
+        [
+            Quantized { x: 314573 },
+            Quantized { x: 196608 },
+            Quantized { x: 91750 },
+            Quantized { x: 6554 },
         ],
         [
             Quantized { x: 327680 },
@@ -270,54 +259,60 @@ fn test_training() {
             Quantized { x: 13107 },
         ],
         [
-            Quantized { x: 327680 },
-            Quantized { x: 222822 },
-            Quantized { x: 104858 },
-            Quantized { x: 26214 },
-        ],
-        [
-            Quantized { x: 340787 },
-            Quantized { x: 229376 },
-            Quantized { x: 98304 },
+            Quantized { x: 288358 },
+            Quantized { x: 209715 },
+            Quantized { x: 85197 },
             Quantized { x: 13107 },
         ],
         [
-            Quantized { x: 340787 },
-            Quantized { x: 222822 },
+            Quantized { x: 301466 },
+            Quantized { x: 209715 },
             Quantized { x: 91750 },
             Quantized { x: 13107 },
         ],
         [
-            Quantized { x: 308019 },
-            Quantized { x: 209715 },
-            Quantized { x: 104858 },
-            Quantized { x: 13107 },
+            Quantized { x: 294912 },
+            Quantized { x: 150733 },
+            Quantized { x: 85197 },
+            Quantized { x: 19661 },
+        ],
+        [
+            Quantized { x: 334234 },
+            Quantized { x: 249037 },
+            Quantized { x: 124518 },
+            Quantized { x: 26214 },
+        ],
+        [
+            Quantized { x: 334234 },
+            Quantized { x: 229376 },
+            Quantized { x: 91750 },
+            Quantized { x: 19661 },
         ],
     ];
 
     let labels = [
+        Quantized { x: 1 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 1 },
+        Quantized { x: 1 },
+        Quantized { x: 0 },
+        Quantized { x: 1 },
+        Quantized { x: 0 },
+        Quantized { x: 1 },
+        Quantized { x: 0 },
+        Quantized { x: 1 },
+        Quantized { x: 0 },
+        Quantized { x: 1 },
+        Quantized { x: 1 },
+        Quantized { x: 1 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 1 },
         Quantized { x: 0 },
         Quantized { x: 0 },
         Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
+        Quantized { x: 1 },
         Quantized { x: 0 },
         Quantized { x: 0 },
         Quantized { x: 0 },
@@ -328,7 +323,7 @@ fn test_training() {
         Quantized { x: 0 },
     ];
 
-    let epochs = 100;
+    let epochs = 10;
     let learning_rate = Quantized::new(6554); //0.1  0.1/2^-16 6553.6
     let ratio = Quantized::new(2185); // 1/nr samples = 1/30 => (1/30)/2^-16 = 2184.53
     let (final_weights, final_bias) = train(epochs, inputs, labels, learning_rate, ratio);

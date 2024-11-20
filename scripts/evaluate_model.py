@@ -31,7 +31,6 @@ if __name__ == "__main__":
         most_sig_bytes = int_rep >> 16 * 8
         if most_sig_bytes != 0:
             int_rep = -(MODULUS - int_rep)
-        
 
         float_value = int_rep * (2 ** -POWER_SCALE)
         print("Float value:", float_value)

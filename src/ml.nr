@@ -33,10 +33,14 @@ fn approx_sigmoid(x: Quantized) -> Quantized {
     outputs[index]
 }
 
-fn get_prediction(weights: [Quantized; 4], inputs: [Quantized; 4], bias: Quantized) -> Quantized {
+fn get_prediction<let M: u32>(
+    weights: [Quantized; M],
+    inputs: [Quantized; M],
+    bias: Quantized,
+) -> Quantized {
     // let z = weights dot_product inputs
     let mut z = 0;
-    for i in 0..4 {
+    for i in 0..M {
         // Perform operations directly on Field elements, scale down at the end
         z += weights[i].x * inputs[i].x;
     }
@@ -71,33 +75,33 @@ fn get_prediction(weights: [Quantized; 4], inputs: [Quantized; 4], bias: Quantiz
     approx_sigmoid(Quantized { x: new_x } + bias)
 }
 
-pub fn train(
+pub fn train<let N: u32, let M: u32>(
     epochs: u64,
-    inputs: [[Quantized; 4]; 30],
-    labels: [Quantized],
+    inputs: [[Quantized; M]; N],
+    labels: [Quantized; N],
     learning_rate: Quantized,
     ratio: Quantized, // ratio = 1/number_samples scaled
-) -> ([Quantized; 4], Quantized) {
-    let mut final_weights = [Quantized::zero(); 4];
+) -> ([Quantized; M], Quantized) {
+    let mut final_weights = [Quantized::zero(); M];
     let mut final_bias = Quantized::zero();
 
     for _ in 0..epochs {
-        let mut weight_gradient = [Quantized::zero(); 4];
+        let mut weight_gradient = [Quantized::zero(); M];
         let mut bias_gradient = Quantized::zero();
 
-        for j in 0..labels.len() {
+        for j in 0..N {
             let prediction = get_prediction(final_weights, inputs[j], final_bias);
             let error = prediction - labels[j];
 
             // Compute gradients
-            for m in 0..4 {
+            for m in 0..M {
                 weight_gradient[m] += (inputs[j][m] * error);
             }
             bias_gradient += error;
         }
 
         // Update weights and bias using the gradients
-        for m in 0..4 {
+        for m in 0..M {
             final_weights[m] -= (weight_gradient[m] * learning_rate * ratio);
         }
         final_bias -= (bias_gradient * learning_rate * ratio);

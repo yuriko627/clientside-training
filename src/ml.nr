@@ -1,4 +1,5 @@
 use crate::quantized::{get_bytes, is_negative, Quantized};
+use super::quantized::scale_down;
 
 fn approx_sigmoid(x: Quantized) -> Quantized {
     // Follows https://github.com/data61/MP-SPDZ/blob/master/Compiler/ml.py#L110
@@ -46,35 +47,9 @@ fn get_prediction<let M: u32>(
         // Perform operations directly on Field elements, scale down at the end
         z += weights[i].x * inputs[i].x;
     }
-    let mut bytes: [u8; 32] = [0; 32];
-    unsafe {
-        bytes = get_bytes(z);
-    }
-    assert(Field::from_be_bytes::<32>(bytes) == z);
-    let negative = is_negative(z);
 
-    if negative == 1 {
-        z = 21888242871839275222246405745257275088548364400416034343698204186575808495616 - z + 1;
-        unsafe {
-            bytes = get_bytes(z);
-        }
-
-        assert(Field::from_be_bytes::<32>(bytes) == z);
-    }
-    // Now scale down with the same trick as in Quantized mul
-    let mut truncated: [u8; 32] = [0; 32];
-    for i in 0..30 {
-        truncated[i + 2] = bytes[i];
-    }
-
-    let mut new_x: Field = Field::from_be_bytes::<32>(truncated);
-    // Flip back sign if the output is negative
-    if negative == 1 {
-        new_x = 21888242871839275222246405745257275088548364400416034343698204186575808495616
-            - new_x
-            + 1;
-    }
-    approx_sigmoid(Quantized { x: new_x } + bias)
+    // Scale the intermediate value down due to multiplications and add bias
+    approx_sigmoid(Quantized { x: scale_down(z) } + bias)
 }
 
 pub fn train<let N: u32, let M: u32>(
@@ -97,9 +72,13 @@ pub fn train<let N: u32, let M: u32>(
 
             // Compute gradients
             for m in 0..M {
-                weight_gradient[m] += (inputs[j][m] * error);
+                weight_gradient[m].x += (inputs[j][m].x * error.x);
             }
             bias_gradient += error;
+        }
+        // Scale down weight_gradients (due to multiplications without scaling)
+        for m in 0..M {
+            weight_gradient[m].x = scale_down(weight_gradient[m].x);
         }
 
         // Update weights and bias using the gradients

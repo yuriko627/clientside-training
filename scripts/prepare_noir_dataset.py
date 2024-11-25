@@ -19,9 +19,23 @@ if __name__ == "__main__":
         print("\t],")
     print("]")
 
-    print("================== LABELS ===========================")
+    print("================== LABEL 0 ===========================")
 
     print("[")
     for i in range(dataset.shape[0]):
         print("\tQuantized { x:", int(dataset.iloc[i, -1] * SCALE), "}, ")
+    print("]")
+
+    print("================== LABEL 1 ===========================")
+
+    print("[")
+    for i in range(dataset.shape[0]):
+        print("\tQuantized { x:", int(dataset.iloc[i, -2] * SCALE), "}, ")
+    print("]")
+
+    print("================== LABEL 2 ===========================")
+
+    print("[")
+    for i in range(dataset.shape[0]):
+        print("\tQuantized { x:", int(dataset.iloc[i, -3] * SCALE), "}, ")
     print("]")

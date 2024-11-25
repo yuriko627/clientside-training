@@ -24,3 +24,17 @@ if __name__ == "__main__":
     for i in range(dataset.shape[0]):
         print(f"\t{dataset.iloc[i, -1]:.1f},")  # Force 0.0 or 1.0 format
     print("];")
+
+    print("================== LABELS ===========================")
+
+    print("let labels = vec![")
+    for i in range(dataset.shape[0]):
+        print(f"\t{dataset.iloc[i, -2]:.1f},")  # Force 0.0 or 1.0 format
+    print("];")
+
+    print("================== LABELS ===========================")
+
+    print("let labels = vec![")
+    for i in range(dataset.shape[0]):
+        print(f"\t{dataset.iloc[i, -3]:.1f},")  # Force 0.0 or 1.0 format
+    print("];")

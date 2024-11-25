@@ -67,17 +67,17 @@ def sigmoid(x):
 if __name__ == "__main__":
     file = open("scripts/quantized.txt")
 
-    lines = file.readiles();
+    lines = file.readlines();
     models = []
 
-    for c in CLASSES:
+    for c in range(CLASSES):
         parameters = []
-        for m in FEATURES:
-            int_rep = int(lines[FEATURES * c + m])
+        for m in range(FEATURES):
+            int_rep = int(lines[FEATURES * c + m], 16)
             print("Field value:", int_rep)
 
             # Check if the values are negative and convert them.
-            most_sig_bytes = int_rep >> 16 * 8
+            most_sig_bytes = int_rep >> (16 * 8)
             if most_sig_bytes != 0:
                 int_rep = -(MODULUS - int_rep)
 

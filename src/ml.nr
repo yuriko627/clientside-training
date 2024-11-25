@@ -290,46 +290,118 @@ fn test_training() {
         ],
     ];
 
-    let labels = [
-        Quantized { x: 65536 },
-        Quantized { x: 0 },
+    let labels_0 = [
         Quantized { x: 0 },
         Quantized { x: 65536 },
         Quantized { x: 65536 },
         Quantized { x: 0 },
-        Quantized { x: 65536 },
         Quantized { x: 0 },
-        Quantized { x: 65536 },
-        Quantized { x: 0 },
-        Quantized { x: 65536 },
-        Quantized { x: 0 },
-        Quantized { x: 65536 },
         Quantized { x: 65536 },
         Quantized { x: 65536 },
         Quantized { x: 0 },
         Quantized { x: 0 },
         Quantized { x: 65536 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
-        Quantized { x: 0 },
         Quantized { x: 65536 },
         Quantized { x: 0 },
         Quantized { x: 0 },
         Quantized { x: 0 },
         Quantized { x: 0 },
         Quantized { x: 0 },
+        Quantized { x: 65536 },
+        Quantized { x: 65536 },
         Quantized { x: 0 },
         Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
+        Quantized { x: 65536 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
+        Quantized { x: 65536 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+    ];
+
+    let labels_1 = [
+        Quantized { x: 65536 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
+        Quantized { x: 65536 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
+        Quantized { x: 65536 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
+        Quantized { x: 65536 },
+        Quantized { x: 65536 },
+        Quantized { x: 65536 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
+    ];
+
+    let label_2 = [
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
+        Quantized { x: 65536 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 0 },
+        Quantized { x: 65536 },
         Quantized { x: 0 },
     ];
 
     let epochs = 10;
     let learning_rate = Quantized::new(6554); //0.1  0.1/2^-16 6553.6
     let ratio = Quantized::new(2185); // 1/nr samples = 1/30 => (1/30)/2^-16 = 2184.53
-    let (final_weights, final_bias) = train(epochs, inputs, labels, learning_rate, ratio);
-    println(final_weights);
-    println(final_bias);
+    let parameters = train_multi_class(
+        epochs,
+        inputs,
+        [labels_0, labels_1, label_2],
+        learning_rate,
+        ratio,
+    );
+    println(parameters);
     /*
+    ========== RESULT FOR TWO CLASSES (0 AND 1) ================================
     epochs = 10
     [Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffe01e }, Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffb046 }, Quantized { x: 0x6ce6 }, Quantized { x: 0x2fc3 }]
     Quantized { x: 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593efffefea }

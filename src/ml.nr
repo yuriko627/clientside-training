@@ -90,6 +90,21 @@ pub fn train<let N: u32, let M: u32>(
     (final_weights, final_bias)
 }
 
+pub fn train_multi_class<let N: u32, let M: u32, let C: u32>(
+    epochs: u64,
+    inputs: [[Quantized; M]; N],
+    labels: [[Quantized; N]; C],
+    learning_rate: Quantized,
+    ratio: Quantized, // ratio = 1/number_samples scaled
+) -> [([Quantized; M], Quantized); C] {
+    let mut result_parameters = [([Quantized { x: 0 }; M], Quantized { x: 0 }); C];
+    for i in 0..C {
+        let parameters = train(epochs, inputs, labels[0], learning_rate, ratio);
+        result_parameters[i] = parameters;
+    }
+    result_parameters
+}
+
 #[test]
 fn test_training() {
     let inputs = [

@@ -99,7 +99,7 @@ pub fn train_multi_class<let N: u32, let M: u32, let C: u32>(
 ) -> [([Quantized; M], Quantized); C] {
     let mut result_parameters = [([Quantized { x: 0 }; M], Quantized { x: 0 }); C];
     for i in 0..C {
-        let parameters = train(epochs, inputs, labels[0], learning_rate, ratio);
+        let parameters = train(epochs, inputs, labels[i], learning_rate, ratio);
         result_parameters[i] = parameters;
     }
     result_parameters

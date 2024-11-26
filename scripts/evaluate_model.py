@@ -60,6 +60,13 @@ class MultiClassModel:
         result = individual_predictions.idxmax(axis=1)
         return result.to_numpy()
 
+    def print_params(self):
+        model_idx = 0
+        for model in self.models:
+            print("Params for model", model_idx)
+            print(model.weights)
+            print(model.bias)
+
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
@@ -74,7 +81,7 @@ if __name__ == "__main__":
     for c in range(CLASSES):
         parameters = []
         for m in range(FEATURES + 1):
-            int_rep = int(lines[FEATURES * c + m], 16)
+            int_rep = int(lines[(FEATURES + 1) * c + m], 16)
             print("Field value:", int_rep)
 
             # Check if the values are negative and convert them.
@@ -91,17 +98,22 @@ if __name__ == "__main__":
         models.append(model)
 
     multi_model = MultiClassModel(models)
+    print("Model params:")
+    multi_model.print_params()
 
     # Load test model.
     dataset = pd.read_csv("./datasets/test_data.csv", index_col=0)
+    print("Test dataset:")
     print(dataset)
 
     test_data = dataset.iloc[:, :4].to_numpy()
-    response_var = dataset.iloc[:, -1].to_numpy().reshape((dataset.shape[0], 1))
+    response_var = dataset.iloc[:, -1].to_numpy()
+    print("Response var:", response_var)
 
     evaluations = multi_model.predict(test_data)
     print("Evaluations:", evaluations)
 
     # Compute the accuracy
+    assert evaluations.shape == response_var.shape
     accuracy = (1 / test_data.shape[0]) * np.sum(evaluations == response_var)
     print("Accuracy:", accuracy.item())

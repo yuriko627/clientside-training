@@ -1,11 +1,12 @@
 import json
+import argparse
 
 SCALE = 2**16
 
 def format_features(features):
     return ", ".join([f"Quantized {{ x: {value} }}" for value in features])
 
-def replace_placeholders(template, inputs, labels_0, labels_1, labels_2):
+def replace_placeholders(template, inputs, labels_0, labels_1, labels_2, epochs):
     """
     Replace placeholders in the Noir template with actual data.
     """
@@ -15,9 +16,18 @@ def replace_placeholders(template, inputs, labels_0, labels_1, labels_2):
         .replace("// LABELS_0_PLACEHOLDER", ",\n        ".join(labels_0))
         .replace("// LABELS_1_PLACEHOLDER", ",\n        ".join(labels_1))
         .replace("// LABELS_2_PLACEHOLDER", ",\n        ".join(labels_2))
+        .replace("// EPOCHS_PLACEHOLDER", str(epochs))
     )
 
 if __name__ == "__main__":
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="Adjust Noir code with flexible epochs.")
+    parser.add_argument(
+        "--epochs", type=int, required=True,
+        help="Number of epochs for training"
+    )
+    args = parser.parse_args()
+
     # Load dataset
     with open("./datasets/train_data.json", "r") as f:
         dataset = json.load(f)
@@ -38,10 +48,10 @@ if __name__ == "__main__":
         template = f.read()
 
     # Replace placeholders in the template
-    updated_code = replace_placeholders(template, inputs, labels_0, labels_1, labels_2)
+    updated_code = replace_placeholders(template, inputs, labels_0, labels_1, labels_2, args.epochs)
 
     # Write updated code to main.nr
     with open("./noir_project/src/main.nr", "w") as f:
         f.write(updated_code)
 
-    print("Noir code updated and saved to ./noir_project/src/main.nr")
+    print(f"Noir code updated for {args.epochs} epochs and saved to ./noir_project/src/main.nr")

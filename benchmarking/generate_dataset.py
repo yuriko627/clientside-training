@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn import datasets, model_selection, preprocessing
+from sklearn import datasets, model_selection, preprocessing, utils
 import json
 import os
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     iris_dataset["species"] = iris.target
 
     # Select SAMPLES_TRAIN + SAMPLES_TEST random elements from the dataset.
-    dataset = iris_dataset.resample(n=SAMPLES_TRAIN + SAMPLES_TEST, random_state=1)
+    dataset = utils.resample(iris_dataset, n_samples=SAMPLES_TRAIN + SAMPLES_TEST)
 
     # Split into training and testing sets
     X_train, X_test, y_train, y_test = model_selection.train_test_split(

@@ -23,7 +23,8 @@ fn test_train() {
         // LABELS_2_PLACEHOLDER
     ];
 
-    let epochs = 10;
+    let epochs = // EPOCHS_PLACEHOLDER;
+
     let learning_rate = Quantized::new(6554); // 0.1
     let ratio = Quantized::new(2185); // 1/nr samples = 1/30
     let parameters = train_multi_class(

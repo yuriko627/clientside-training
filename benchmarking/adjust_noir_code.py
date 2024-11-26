@@ -2,7 +2,6 @@ import json
 import argparse
 
 SCALE = 2**16
-SAMPLES_TRAIN = 30 
 
 def format_features(features):
     return ", ".join([f"Quantized {{ x: {value} }}" for value in features])
@@ -28,8 +27,13 @@ if __name__ == "__main__":
         "--epochs", type=int, required=True,
         help="Number of epochs for training"
     )
+    parser.add_argument(
+        "--samples-train", type=int, default=30,
+        help="Number of training samples (default: 30)"
+    )
     args = parser.parse_args()
 
+    SAMPLES_TRAIN = args.samples_train
     # Load dataset
     with open("./datasets/train_data.json", "r") as f:
         dataset = json.load(f)

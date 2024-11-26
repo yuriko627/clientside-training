@@ -1,10 +1,9 @@
 import pandas as pd
 from sklearn import datasets, model_selection, preprocessing, utils
+import argparse
 import json
 import os
 
-SAMPLES_TRAIN = 30
-SAMPLES_TEST = 20
 SCALE = 2**16
 
 def quantize_row(features):
@@ -12,6 +11,21 @@ def quantize_row(features):
     return [round(feature * SCALE) for feature in features]
 
 if __name__ == "__main__":
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(description="Generate dataset with dynamic sample size.")
+    parser.add_argument(
+        "--samples-train", type=int, default=30,
+        help="Number of training samples (default: 30)"
+    )
+    parser.add_argument(
+        "--samples-test", type=int, default=20,
+        help="Number of test samples (default: 20)"
+    )
+    args = parser.parse_args()
+
+    SAMPLES_TRAIN = args.samples_train
+    SAMPLES_TEST = args.samples_test
+
     # Ensure the `datasets` folder exists
     os.makedirs("./datasets", exist_ok=True)
 

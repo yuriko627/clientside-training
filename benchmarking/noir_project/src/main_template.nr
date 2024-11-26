@@ -26,7 +26,9 @@ fn test_train() {
     let epochs = // EPOCHS_PLACEHOLDER;
 
     let learning_rate = Quantized::new(6554); // 0.1
-    let ratio = Quantized::new(2185); // 1/nr samples = 1/30
+    let ratio = Quantized::new(
+      // RATIO_PLACEHOLDER
+      );
     let parameters = train_multi_class(
         epochs,
         inputs,

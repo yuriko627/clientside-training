@@ -2,11 +2,12 @@ import json
 import argparse
 
 SCALE = 2**16
+SAMPLES_TRAIN = 30 
 
 def format_features(features):
     return ", ".join([f"Quantized {{ x: {value} }}" for value in features])
 
-def replace_placeholders(template, inputs, labels_0, labels_1, labels_2, epochs):
+def replace_placeholders(template, inputs, labels_0, labels_1, labels_2, epochs, ratio):
     """
     Replace placeholders in the Noir template with actual data.
     """
@@ -17,6 +18,7 @@ def replace_placeholders(template, inputs, labels_0, labels_1, labels_2, epochs)
         .replace("// LABELS_1_PLACEHOLDER", ",\n        ".join(labels_1))
         .replace("// LABELS_2_PLACEHOLDER", ",\n        ".join(labels_2))
         .replace("// EPOCHS_PLACEHOLDER", str(epochs))
+        .replace("// RATIO_PLACEHOLDER", str(ratio))
     )
 
 if __name__ == "__main__":
@@ -31,6 +33,9 @@ if __name__ == "__main__":
     # Load dataset
     with open("./datasets/train_data.json", "r") as f:
         dataset = json.load(f)
+
+    # Calculate ratio based on the hardcoded samples_train
+    ratio = round(SCALE / SAMPLES_TRAIN)  # Compute 1/n * SCALE
 
     inputs = []
     labels_0 = []
@@ -48,7 +53,7 @@ if __name__ == "__main__":
         template = f.read()
 
     # Replace placeholders in the template
-    updated_code = replace_placeholders(template, inputs, labels_0, labels_1, labels_2, args.epochs)
+    updated_code = replace_placeholders(template, inputs, labels_0, labels_1, labels_2, args.epochs, ratio)
 
     # Write updated code to main.nr
     with open("./noir_project/src/main.nr", "w") as f:

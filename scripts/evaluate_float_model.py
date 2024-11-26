@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from sklearn.metrics import accuracy_score
 from typing import List
 
 POWER_SCALE = 16
@@ -44,11 +45,13 @@ class MultiClassModel:
             predictions.append(pd.DataFrame(pred_model, columns=[col_num]))
             col_num += 1
         individual_predictions = pd.concat(predictions, axis=1)
-        print(individual_predictions)
         result = individual_predictions.idxmax(axis=1)
-        print(result)
-
         return result.to_numpy()
+
+    def print_params(self):
+        for model in self.models:
+            print(model.weights)
+            print(model.bias)
 
 
 def sigmoid(x):
@@ -56,7 +59,7 @@ def sigmoid(x):
 
 
 if __name__ == "__main__":
-    file = open("scripts/quantized.txt")
+    file = open("scripts/float.txt")
 
     lines = file.readlines()
     models = []
@@ -64,7 +67,8 @@ if __name__ == "__main__":
     for c in range(CLASSES):
         parameters = []
         for m in range(FEATURES + 1):
-            float_val = float(lines[FEATURES * c + m], 16)
+            float_val = float(lines[(FEATURES + 1) * c + m])
+            print("Value read:", float_val)
 
             # Check if the values are negative and convert them.
             parameters.append(float_val)
@@ -73,17 +77,20 @@ if __name__ == "__main__":
         models.append(model)
 
     multi_model = MultiClassModel(models)
+    multi_model.print_params()
 
     # Load test model.
     dataset = pd.read_csv("./datasets/test_data.csv", index_col=0)
     print(dataset)
 
     test_data = dataset.iloc[:, :4].to_numpy()
-    response_var = dataset.iloc[:, -1].to_numpy().reshape((dataset.shape[0], 1))
+    response_var = dataset.iloc[:, -1].to_numpy()
+    print("Response var:", response_var)
 
     evaluations = multi_model.predict(test_data)
     print("Evaluations:", evaluations)
 
     # Compute the accuracy
-    accuracy = (1 / test_data.shape[0]) * np.sum(evaluations == response_var)
-    print("Accuracy:", accuracy.item())
+    assert evaluations.shape == response_var.shape
+    accuracy = accuracy_score(response_var, evaluations)
+    print("Accuracy:", accuracy)

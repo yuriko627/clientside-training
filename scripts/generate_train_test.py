@@ -47,6 +47,9 @@ if __name__ == "__main__":
     print("TEST DATASET")
     print(test_df)
 
+    # Save the train dataset before binarizing the response variable
+    train_df.to_csv("./datasets/train_data_original.csv")
+
     # Binarizing the target.
     label_binarizer = preprocessing.LabelBinarizer()
     label_binarizer_output = label_binarizer.fit_transform(train_df["species"])

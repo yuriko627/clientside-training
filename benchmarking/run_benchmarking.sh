@@ -4,6 +4,7 @@
 EPOCHS=10
 SAMPLES_TRAIN=30
 SAMPLES_TEST=20
+DATASET_NAME="iris"
 
 # Parse arguments
 for arg in "$@"; do
@@ -17,6 +18,9 @@ for arg in "$@"; do
         --samples-test=*)
             SAMPLES_TEST="${arg#*=}" # Extract value for test samples
             ;;
+        --dataset=*)
+            DATASET_NAME="${arg#*=}" # Extract value for test samples
+            ;;
         *)
             echo "Unknown argument: $arg"
             exit 1
@@ -25,7 +29,7 @@ for arg in "$@"; do
 done
 
 # Step 1: Generate dataset with dynamic samples
-python3 generate_dataset.py --samples-train $SAMPLES_TRAIN --samples-test $SAMPLES_TEST
+python3 generate_dataset.py --dataset $DATASET_NAME --samples-train $SAMPLES_TRAIN --samples-test $SAMPLES_TEST
 
 # Step 2: Adjust Noir code with dynamic epochs and training samples
 python3 adjust_noir_code.py --epochs $EPOCHS --samples-train $SAMPLES_TRAIN

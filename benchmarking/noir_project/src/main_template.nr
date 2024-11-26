@@ -11,16 +11,8 @@ fn test_train() {
         // INPUTS_PLACEHOLDER
     ];
 
-    let labels_0 = [
-        // LABELS_0_PLACEHOLDER
-    ];
-
-    let labels_1 = [
-        // LABELS_1_PLACEHOLDER
-    ];
-
-    let label_2 = [
-        // LABELS_2_PLACEHOLDER
+    let labels = [
+        // LABELS_PLACEHOLDER
     ];
 
     let epochs = // EPOCHS_PLACEHOLDER;
@@ -29,12 +21,12 @@ fn test_train() {
         // LEARNING_RATE_PLACEHOLDER
     );
     let ratio = Quantized::new(
-      // RATIO_PLACEHOLDER
-      );
+        // RATIO_PLACEHOLDER
+    );
     let parameters = train_multi_class(
         epochs,
         inputs,
-        [labels_0, labels_1, label_2],
+        labels,
         learning_rate,
         ratio,
     );

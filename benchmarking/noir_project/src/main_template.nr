@@ -25,7 +25,9 @@ fn test_train() {
 
     let epochs = // EPOCHS_PLACEHOLDER;
 
-    let learning_rate = Quantized::new(6554); // 0.1
+    let learning_rate = Quantized::new(
+        // LEARNING_RATE_PLACEHOLDER
+    );
     let ratio = Quantized::new(
       // RATIO_PLACEHOLDER
       );

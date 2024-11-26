@@ -3,7 +3,6 @@ This script reads the train dataset from the datasets/ folder and converts it
 into Rust format. The output is provided through the stdout.
 """
 
-from sklearn import datasets
 import pandas as pd
 
 if __name__ == "__main__":

@@ -3,7 +3,6 @@ This script reads the train dataset from the datasets/ folder and convert it
 into Noir format. The output is provided through the stdout.
 """
 
-from sklearn import datasets
 import pandas as pd
 
 SCALE = 2**16
@@ -39,3 +38,4 @@ if __name__ == "__main__":
     for i in range(dataset.shape[0]):
         print("\tQuantized { x:", int(dataset.iloc[i, -3] * SCALE), "}, ")
     print("]")
+

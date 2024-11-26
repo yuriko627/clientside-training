@@ -11,6 +11,7 @@ model first and the last parameter will be the bias.
 """
 
 from typing import List
+from sklearn.metrics import accuracy_score
 import numpy as np
 import pandas as pd
 
@@ -115,5 +116,5 @@ if __name__ == "__main__":
 
     # Compute the accuracy
     assert evaluations.shape == response_var.shape
-    accuracy = (1 / test_data.shape[0]) * np.sum(evaluations == response_var)
-    print("Accuracy:", accuracy.item())
+    accuracy = accuracy_score(response_var, evaluations)
+    print("Accuracy:", accuracy)

@@ -113,3 +113,21 @@ if __name__ == "__main__":
     print("- CSV (train): ./datasets/train_data.csv")
     print("- CSV (test): ./datasets/test_data.csv")
     print("- JSON (Noir): ./datasets/train_data.json")
+
+    # Determine the number of features and classes
+    num_features = data.shape[1] - 1  # Exclude the target column
+    num_classes = len(label_binarizer.classes_)
+
+    # Save metadata
+    metadata = {
+        "features": num_features,
+        "classes": num_classes,
+        "samples_train": SAMPLES_TRAIN,
+        "samples_test": SAMPLES_TEST
+    }
+
+    with open("./datasets/metadata.json", "w") as f:
+        json.dump(metadata, f, indent=4)
+
+    print(f"Metadata saved to ./datasets/metadata.json")
+

@@ -31,9 +31,26 @@ done
 # Step 1: Generate dataset with dynamic samples
 python3 generate_dataset.py --dataset $DATASET_NAME --samples-train $SAMPLES_TRAIN --samples-test $SAMPLES_TEST
 
-# Step 2: Adjust Noir code with dynamic epochs and training samples
+# Step 2: Load metadata
+METADATA_FILE="./datasets/metadata.json"
+if [ ! -f "$METADATA_FILE" ]; then
+    echo "Metadata file not found!"
+    exit 1
+fi
+
+FEATURES=$(jq .features $METADATA_FILE)
+CLASSES=$(jq .classes $METADATA_FILE)
+
+# Step 3: Adjust Noir code with dynamic epochs and training samples
 python3 adjust_noir_code.py --epochs $EPOCHS --samples-train $SAMPLES_TRAIN
 
-# Step 3: Run Noir tests
+# Step 4: Run Noir tests
 cd noir_project
-nargo test --show-output
+nargo test --show-output > ../noir_output.txt
+cd ..
+
+# Step 5: Parse Noir output
+python3 parse_noir_output.py --output-file noir_output.txt --quantized-file quantized.txt --features $FEATURES --classes $CLASSES
+
+# Step 6: Compute accuracy
+python3 compute_accuracy.py --quantized-file quantized.txt --test-data ./datasets/test_data.csv --classes $CLASSES --features $FEATURES --samples $SAMPLES_TEST

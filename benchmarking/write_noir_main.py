@@ -3,27 +3,17 @@ import argparse
 
 SCALE = 2**16  # Scale factor for quantization
 
-def generate_noir_code(labels, samples_train, epochs, learning_rate, ratio):
+def generate_noir_code(samples_train, epochs, learning_rate, ratio):
     """
-    Generate the Noir `main.nr` code with dynamic labels.
+    Generate the Noir `main.nr` code.
     """
-    # Scale labels and format as [[Quantized; samples_train]; num_classes]
-    labels_formatted = ",\n        ".join(
-        f"[{', '.join(f'Quantized {{ x: {label * SCALE} }}' for label in class_labels)}]"
-        for class_labels in labels
-    )
-
     noir_code = f"""
 use noir_mpc_ml::ml::train_multi_class;
 use noir_mpc_ml::quantized::Quantized;
 
-fn main(inputs: [[Quantized; 4]; 30]) -> pub [([Quantized; 4], Quantized); 3] {{
+fn main(inputs: [[Quantized; 4]; 30], labels: [[Quantized; {samples_train}]; 3]) -> pub [([Quantized; 4], Quantized); 3] {{
     let learning_rate = {learning_rate};
     let ratio = {ratio};
-
-    let labels: [[Quantized; {samples_train}]; {len(labels)}] = [
-        {labels_formatted}
-    ];
 
     let epochs = {epochs};
 
@@ -36,16 +26,24 @@ fn main(inputs: [[Quantized; 4]; 30]) -> pub [([Quantized; 4], Quantized); 3] {{
     return noir_code
 
 
-def generate_prover_toml(features):
+def generate_prover_toml(features, labels):
     """
-    Generate the `Prover.toml` file with the provided features.
+    Generate the `Prover.toml` file with the provided features and labels.
     """
     toml_inputs = []
     for sample in features:
         quantized_sample = ", ".join(f'{{ x = "{feature}" }}' for feature in sample)
         toml_inputs.append(f"[{quantized_sample}]")
     
-    toml_content = "inputs = [\n    " + ",\n    ".join(toml_inputs) + "\n]"
+    toml_labels = []
+    for class_labels in labels:
+        quantized_labels = ", ".join(f'{{ x = "{label * SCALE}" }}' for label in class_labels)
+        toml_labels.append(f"[{quantized_labels}]")
+
+    toml_content = (
+        "inputs = [\n    " + ",\n    ".join(toml_inputs) + "\n]\n\n"
+        "labels = [\n    " + ",\n    ".join(toml_labels) + "\n]"
+    )
     return toml_content
 
 
@@ -90,8 +88,8 @@ def main():
     labels = extract_labels(train_data, samples_train)
 
     # Generate Noir code and Prover.toml
-    noir_code = generate_noir_code(labels, samples_train, args.epochs, learning_rate, ratio)
-    prover_toml = generate_prover_toml(features)
+    noir_code = generate_noir_code(samples_train, args.epochs, learning_rate, ratio)
+    prover_toml = generate_prover_toml(features, labels)
 
     # Write Noir code to /src
     with open(f"{args.output_dir}/src/main.nr", "w") as noir_file:

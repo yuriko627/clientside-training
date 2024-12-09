@@ -4,3 +4,5 @@ ds
 venv
 include
 datasets
+scripts/float.txt
+scripts/quantized.txt

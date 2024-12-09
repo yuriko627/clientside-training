@@ -11,7 +11,7 @@ def generate_noir_code(samples_train, epochs, learning_rate, ratio):
 use noir_mpc_ml::ml::train_multi_class;
 use noir_mpc_ml::quantized::Quantized;
 
-fn main(inputs: [[Quantized; 4]; 30], labels: [[Quantized; {samples_train}]; 3]) -> pub [([Quantized; 4], Quantized); 3] {{
+fn main(inputs: [[Quantized; 4]; {samples_train}], labels: [[Quantized; {samples_train}]; 3]) -> pub [([Quantized; 4], Quantized); 3] {{
     let learning_rate = {learning_rate};
     let ratio = {ratio};
 

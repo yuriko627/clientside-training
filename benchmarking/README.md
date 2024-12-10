@@ -60,7 +60,7 @@ $ ./run_proof_example.sh
 
 This creates the same Noir program as for proving & verifying but instead of executing those steps, just obtains the gatecount. 
 
-For a single set of parameters:
+For a single set of parameters, the output is saved in `output/benchmarks.txt`:
 ```bash
 $ ./cleanup.sh
 $ ./run_get_gatecount.sh

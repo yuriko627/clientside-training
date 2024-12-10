@@ -60,5 +60,5 @@ $ ./run_get_gatecount.sh
 Running multiple benchmarks at once, gathering output in `benches/benchmarks.csv`:
 ```bash
 $ ./cleanup.sh
-$ ./generate_gatecounts_csv.sh
+$ ./run_get_multiple_gatecounts.sh
 ```

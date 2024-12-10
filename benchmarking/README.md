@@ -8,6 +8,15 @@ The current script does the following:
 
 Note that there are conversions happening of the data in between because the original data is in floats and the Noir library works with Quantized. 
 
+## Prerequisites
+
+This works with `nargo` version `1.0.0-beta.0` and `bb` version `0.63.0`. 
+
+```bash
+$ noirup --version 1.0.0-beta.0
+$ bbup --v 0.63.0
+```
+
 ## Run
 
 ### Single test

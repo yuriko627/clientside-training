@@ -1,9 +1,15 @@
 import csv
+import os
 
 # Input and output file paths
 input_file = "output/benchmarks.txt"
 output_file = "benches/benchmarks.csv"
 
+# Ensure the output directory exists
+output_dir = os.path.dirname(output_file)
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+    
 # Initialize storage for parsed data
 results = []
 

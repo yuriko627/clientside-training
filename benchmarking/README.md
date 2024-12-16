@@ -14,7 +14,7 @@ This works with `nargo` version `1.0.0-beta.0` and `bb` version `0.63.0`.
 
 ```bash
 $ noirup --version 1.0.0-beta.0
-$ bbup --v 0.63.0
+$ bbup -v 0.63.0
 ```
 
 ## Run

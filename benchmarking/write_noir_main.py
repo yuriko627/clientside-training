@@ -3,7 +3,7 @@ import argparse
 
 SCALE = 2**16  # Scale factor for quantization
 
-def generate_noir_code(samples_train, epochs, learning_rate, ratio):
+def generate_noir_code(samples_train, epochs, learning_rate, ratio, num_features, num_classes):
     """
     Generate the Noir `main.nr` code.
     """
@@ -11,7 +11,7 @@ def generate_noir_code(samples_train, epochs, learning_rate, ratio):
 use noir_mpc_ml::ml::train_multi_class;
 use noir_mpc_ml::quantized::Quantized;
 
-fn main(inputs: [[Quantized; 4]; {samples_train}], labels: [[Quantized; {samples_train}]; 3]) -> pub [([Quantized; 4], Quantized); 3] {{
+fn main(inputs: [[Quantized; {num_features}]; {samples_train}], labels: [[Quantized; {samples_train}]; {num_classes}]) -> pub [([Quantized; {num_features}], Quantized); {num_classes}] {{
     let learning_rate = {learning_rate};
     let ratio = {ratio};
 
@@ -68,6 +68,7 @@ def main():
     parser.add_argument("--data", type=str, required=True, help="Path to train_data.json")
     parser.add_argument("--epochs", type=int, required=True, help="Number of epochs for training")
     parser.add_argument("--samples-train", type=int, required=True, help="Number of training samples")
+    parser.add_argument("--learning-rate", type=float, required=True, help="Learning rate (default 0.1)")
     parser.add_argument("--output-dir", type=str, default="./noir_project", help="Project directory")
     args = parser.parse_args()
 
@@ -79,8 +80,9 @@ def main():
         train_data = json.load(data_file)
 
     num_features = metadata["features"]
+    num_classes = metadata["classes"]
     samples_train = args.samples_train
-    learning_rate = round(0.1 * SCALE)  # Example scaling
+    learning_rate = round(args.learning_rate * SCALE)
     ratio = round(SCALE / samples_train)
 
     # Extract features and labels
@@ -88,7 +90,7 @@ def main():
     labels = extract_labels(train_data, samples_train)
 
     # Generate Noir code and Prover.toml
-    noir_code = generate_noir_code(samples_train, args.epochs, learning_rate, ratio)
+    noir_code = generate_noir_code(samples_train, args.epochs, learning_rate, ratio, num_features, num_classes)
     prover_toml = generate_prover_toml(features, labels)
 
     # Write Noir code to /src

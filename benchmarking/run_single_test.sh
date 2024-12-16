@@ -5,6 +5,7 @@ EPOCHS=10
 SAMPLES_TRAIN=30
 SAMPLES_TEST=20
 DATASET_NAME="iris"
+LEARNING_RATE=0.1
 
 # Parse arguments
 for arg in "$@"; do
@@ -19,7 +20,10 @@ for arg in "$@"; do
             SAMPLES_TEST="${arg#*=}" # Extract value for test samples
             ;;
         --dataset=*)
-            DATASET_NAME="${arg#*=}" # Extract value for test samples
+            DATASET_NAME="${arg#*=}" # Extract value for dataset name
+            ;;
+        --learning-rate=*)
+            LEARNING_RATE="${arg#*=}" # Extract value for learning rate
             ;;
         *)
             echo "Unknown argument: $arg"
@@ -41,8 +45,8 @@ fi
 FEATURES=$(jq .features $METADATA_FILE)
 CLASSES=$(jq .classes $METADATA_FILE)
 
-# Step 3: Adjust Noir code with dynamic epochs and training samples
-python3 write_noir_test.py --epochs $EPOCHS --samples-train $SAMPLES_TRAIN
+# Step 3: Adjust Noir code with dynamic epochs, training samples, and learning rate
+python3 write_noir_test.py --epochs $EPOCHS --samples-train $SAMPLES_TRAIN --learning-rate $LEARNING_RATE
 
 # Step 4: Run Noir tests
 cd noir_project

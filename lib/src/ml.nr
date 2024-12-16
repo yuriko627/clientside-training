@@ -1,4 +1,4 @@
-use crate::quantized::{get_bytes, is_negative, Quantized};
+use crate::quantized::Quantized;
 use super::quantized::scale_down;
 
 fn approx_sigmoid(x: Quantized) -> Quantized {

@@ -1,11 +1,28 @@
 #!/bin/bash
 
 # Default values
+LEARNING_RATE=0.1
 DATASET_NAME="iris"
 PROJECT_DIR="./noir_project"
 TARGET_DIR="$PROJECT_DIR/target"
 OUT_DIR="output"
 OUTPUT_BENCH="$OUT_DIR/benchmarks.txt"
+
+# Parse arguments
+for arg in "$@"; do
+    case $arg in
+        --dataset=*)
+            DATASET_NAME="${arg#*=}" # Extract value for dataset
+            ;;
+        --learning-rate=*)
+            LEARNING_RATE="${arg#*=}" # Extract value for learning rate
+            ;;
+        *)
+            echo "Unknown argument: $arg"
+            exit 1
+            ;;
+    esac
+done
 
 # Ranges for parameters
 EPOCHS_LIST=(5 10 15)
@@ -42,7 +59,7 @@ for EPOCHS in "${EPOCHS_LIST[@]}"; do
 
         # Step 3: Generate Noir files
         echo "Generating Noir main.nr and Prover.toml..."
-        python3 write_noir_main.py --metadata "$METADATA_FILE" --data "$TRAIN_DATA_FILE" --epochs "$EPOCHS" --samples-train "$SAMPLES_TRAIN" --output-dir "$PROJECT_DIR"
+        python3 write_noir_main.py --metadata "$METADATA_FILE" --data "$TRAIN_DATA_FILE" --epochs "$EPOCHS" --samples-train "$SAMPLES_TRAIN" --learning-rate "$LEARNING_RATE" --output-dir "$PROJECT_DIR"
         if [ $? -ne 0 ]; then
             echo "Error: Noir file generation failed for epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN."
             continue

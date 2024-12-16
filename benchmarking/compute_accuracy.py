@@ -33,6 +33,7 @@ class MultiClassModel:
 
 
 def sigmoid(x):
+    x = np.clip(x, -709, 709)
     return 1 / (1 + np.exp(-x))
 
 

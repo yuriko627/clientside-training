@@ -1,9 +1,15 @@
 import csv
 import os
+import argparse
 
-# Input and output file paths
+# Input file remains hardcoded
 input_file = "output/benchmarks.txt"
-output_file = "benches/benchmarks.csv"
+
+# Parse arguments for output file
+parser = argparse.ArgumentParser(description="Parse benchmark results and save to a CSV file.")
+parser.add_argument("--output", required=True, help="Path to the output CSV file")
+args = parser.parse_args()
+output_file = args.output
 
 # Ensure the output directory exists
 output_dir = os.path.dirname(output_file)

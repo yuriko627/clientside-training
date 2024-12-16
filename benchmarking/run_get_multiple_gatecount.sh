@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # Default values
+EPOCHS_LIST=(5 10 15)
+SAMPLES_TRAIN_LIST=(10 20 30)
 LEARNING_RATE=0.1
 DATASET_NAME="iris"
 PROJECT_DIR="./noir_project"
@@ -11,6 +13,12 @@ OUTPUT_BENCH="$OUT_DIR/benchmarks.txt"
 # Parse arguments
 for arg in "$@"; do
     case $arg in
+        --epochs-list=*)
+            IFS=',' read -r -a EPOCHS_LIST <<< "${arg#*=}" # Extract and split EPOCHS_LIST
+            ;;
+        --samples-train-list=*)
+            IFS=',' read -r -a SAMPLES_TRAIN_LIST <<< "${arg#*=}" # Extract and split SAMPLES_TRAIN_LIST
+            ;;
         --dataset=*)
             DATASET_NAME="${arg#*=}" # Extract value for dataset
             ;;
@@ -23,10 +31,6 @@ for arg in "$@"; do
             ;;
     esac
 done
-
-# Ranges for parameters
-EPOCHS_LIST=(5 10 15)
-SAMPLES_TRAIN_LIST=(10 20 30)
 
 # Ensure output directory exists
 if [ ! -d "$OUT_DIR" ]; then
@@ -102,7 +106,11 @@ for EPOCHS in "${EPOCHS_LIST[@]}"; do
     done
 done
 
-# Step 7: Generate CSV from benchmarks
-python3 generate_gatecounts_csv.py
+# Generate a timestamp for the CSV file
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+OUTPUT_CSV="benches/benchmarks__${DATASET_NAME}_${TIMESTAMP}.csv"
 
-echo "Benchmarking completed. CSV file created at benches/benchmarks.csv."
+# Step 7: Generate CSV from benchmarks
+python3 generate_gatecounts_csv.py --output "$OUTPUT_CSV"
+
+echo "Benchmarking completed. CSV file created at $OUTPUT_CSV." | tee -a "$OUTPUT_BENCH"

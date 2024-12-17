@@ -36,7 +36,7 @@ done
 
 # Step 1: Generate dataset with dynamic samples
 echo "Generating dataset..."
-python3 generate_dataset.py --dataset "$DATASET_NAME" --samples-train "$SAMPLES_TRAIN" --samples-test "$SAMPLES_TEST"
+python3 helpers/generate_dataset.py --dataset "$DATASET_NAME" --samples-train "$SAMPLES_TRAIN" --samples-test "$SAMPLES_TEST"
 if [ $? -ne 0 ]; then
     echo "Error: Dataset generation failed."
     exit 1
@@ -52,7 +52,7 @@ fi
 
 # Step 3: Generate Noir files
 echo "Generating Noir main.nr and Prover.toml..."
-python3 write_noir_main.py --metadata "$METADATA_FILE" --data "$TRAIN_DATA_FILE" --epochs "$EPOCHS" --samples-train "$SAMPLES_TRAIN" --learning-rate "$LEARNING_RATE" --output-dir "$PROJECT_DIR"
+python3 helpers/write_noir_main.py --metadata "$METADATA_FILE" --data "$TRAIN_DATA_FILE" --epochs "$EPOCHS" --samples-train "$SAMPLES_TRAIN" --learning-rate "$LEARNING_RATE" --output-dir "$PROJECT_DIR"
 if [ $? -ne 0 ]; then
     echo "Error: Noir file generation failed."
     exit 1

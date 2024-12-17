@@ -1,0 +1,8 @@
+[package]
+name = "conoir_project"
+type = "bin"
+authors = [""]
+compiler_version = ">=1.0.0"
+
+[dependencies]
+noir_mpc_ml = { path = "../../lib" }

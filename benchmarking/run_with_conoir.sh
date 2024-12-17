@@ -4,12 +4,10 @@
 EPOCHS=10
 SAMPLES_TRAIN=30
 SAMPLES_TEST=20
-LEARNING_RATE=0.1
 DATASET_NAME="iris"
-PROJECT_DIR="./noir_project"
+LEARNING_RATE=0.1
+PROJECT_DIR="./conoir_project"
 TARGET_DIR="$PROJECT_DIR/target"
-OUTPUT_DIR="output"
-OUTPUT_BENCH="$OUTPUT_DIR/benchmarks.txt"
 
 # Parse arguments
 for arg in "$@"; do
@@ -36,11 +34,6 @@ for arg in "$@"; do
     esac
 done
 
-# Ensure output directory exists
-if [ ! -d "$OUTPUT_DIR" ]; then
-    mkdir -p "$OUTPUT_DIR"
-fi
-
 # Step 1: Generate dataset with dynamic samples
 echo "Generating dataset..."
 python3 helpers/generate_dataset.py --dataset "$DATASET_NAME" --samples-train "$SAMPLES_TRAIN" --samples-test "$SAMPLES_TEST"
@@ -65,35 +58,34 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Step 4: Compile the Noir project
-echo "Compiling Noir project..."
-if [ ! -d "$PROJECT_DIR" ]; then
-    echo "Error: Project directory $PROJECT_DIR does not exist!"
+# Step 4: Run the full MPC flow script in conoir_project
+CONOIR_SCRIPT="run_full_mpc_flow.sh"
+
+echo "Running full flow with conoir..."
+if [ -f "$PROJECT_DIR/$CONOIR_SCRIPT" ]; then
+    # Change to the project directory
+    cd "$PROJECT_DIR" || { echo "Error: Could not change to $PROJECT_DIR"; exit 1; }
+    
+    # Capture start time
+    START_TIME=$(date +%s)
+    
+    # Run the script
+    bash "$CONOIR_SCRIPT"
+    if [ $? -ne 0 ]; then
+        echo "Error: Full MPC flow script failed."
+        exit 1
+    fi
+    
+    # Capture end time
+    END_TIME=$(date +%s)
+    
+    # Calculate and display elapsed time
+    ELAPSED_TIME=$((END_TIME - START_TIME))
+    echo "Full MPC flow script completed in $ELAPSED_TIME seconds."
+    
+    # Return to the parent directory
+    cd ..
+else
+    echo "Error: Script '$PROJECT_DIR/$CONOIR_SCRIPT' not found."
     exit 1
 fi
-
-pushd "$PROJECT_DIR" > /dev/null
-nargo execute
-if [ $? -ne 0 ]; then
-    echo "Error: Failed to compile the Noir project."
-    popd > /dev/null
-    exit 1
-fi
-popd > /dev/null
-
-# Step 5: Check for compiled output
-echo "Checking for compiled output..."
-if [ ! -f "$TARGET_DIR/noir_project.json" ]; then
-    echo "Error: Compiled file noir_project.json not found in $TARGET_DIR."
-    exit 1
-fi
-
-# Step 6: Get gatecount
-echo "Get gatecount..."
-bb gates -b "$TARGET_DIR/noir_project.json" >> "$OUTPUT_BENCH"
-if [ $? -ne 0 ]; then
-    echo "Error: Failed to get gatecount."
-    exit 1
-fi
-
-echo "Gatecount finished."

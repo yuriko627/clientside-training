@@ -20,30 +20,27 @@ fi
 LOG_DIR="logs"
 mkdir -p "$LOG_DIR"
 
+# Convert lists to comma-separated strings
+EPOCHS_LIST_STR=$(IFS=','; echo "${EPOCHS_LIST[*]}")
+SAMPLES_TRAIN_LIST_STR=$(IFS=','; echo "${SAMPLES_TRAIN_LIST[*]}")
+
 # Loop through datasets
 for DATASET in "${DATASETS[@]}"; do
     echo "Starting benchmarks for dataset: $DATASET"
 
-    # Loop through epochs and sample train values
-    for EPOCHS in "${EPOCHS_LIST[@]}"; do
-        for SAMPLES_TRAIN in "${SAMPLES_TRAIN_LIST[@]}"; do
-            echo "Running benchmark with dataset=$DATASET, epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN"
+    # Generate a log file for the current dataset
+    TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+    LOG_FILE="$LOG_DIR/benchmark_${DATASET}_${TIMESTAMP}.log"
 
-            # Generate a log file for the current benchmark
-            TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-            LOG_FILE="$LOG_DIR/benchmark_${DATASET}_${EPOCHS}_${SAMPLES_TRAIN}_${TIMESTAMP}.log"
+    # Execute the benchmark script once per dataset
+    "$BENCHMARK_SCRIPT" --dataset="$DATASET" --epochs-list="$EPOCHS_LIST_STR" --samples-train-list="$SAMPLES_TRAIN_LIST_STR" >> "$LOG_FILE" 2>&1
 
-            # Execute the benchmark script
-            "$BENCHMARK_SCRIPT" --dataset="$DATASET" --epochs-list="$EPOCHS" --samples-train-list="$SAMPLES_TRAIN" >> "$LOG_FILE" 2>&1
-
-            # Check the exit status of the benchmark script
-            if [ $? -ne 0 ]; then
-                echo "Error: Benchmark failed for dataset=$DATASET, epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN. Check log: $LOG_FILE"
-            else
-                echo "Benchmark completed for dataset=$DATASET, epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN. Results logged in: $LOG_FILE"
-            fi
-        done
-    done
+    # Check the exit status of the benchmark script
+    if [ $? -ne 0 ]; then
+        echo "Error: Benchmark failed for dataset=$DATASET. Check log: $LOG_FILE"
+    else
+        echo "Benchmark completed for dataset=$DATASET. Results logged in: $LOG_FILE"
+    fi
 done
 
 echo "All benchmarks completed. Logs are available in the '$LOG_DIR' directory."

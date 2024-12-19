@@ -83,8 +83,7 @@ fi
 
 # Step 6: Generate the proof
 echo "Generating proof..."
-bb prove -b "$TARGET_DIR/noir_project.json" -w "$TARGET_DIR/noir_project.gz" -o "$TARGET_DIR/proof"
-if [ $? -ne 0 ]; then
+if ! bb prove -b "$TARGET_DIR/noir_project.json" -w "$TARGET_DIR/noir_project.gz" -o "$TARGET_DIR/proof" 2>&1; then
     echo "Error: Failed to generate proof."
     exit 1
 fi

@@ -33,7 +33,7 @@ for arg in "$@"; do
 done
 
 # Step 1: Generate dataset with dynamic samples
-python3 generate_dataset.py --dataset $DATASET_NAME --samples-train $SAMPLES_TRAIN --samples-test $SAMPLES_TEST
+python3 helpers/generate_dataset.py --dataset $DATASET_NAME --samples-train $SAMPLES_TRAIN --samples-test $SAMPLES_TEST
 
 # Step 2: Load metadata
 METADATA_FILE="./datasets/metadata.json"
@@ -46,7 +46,7 @@ FEATURES=$(jq .features $METADATA_FILE)
 CLASSES=$(jq .classes $METADATA_FILE)
 
 # Step 3: Adjust Noir code with dynamic epochs, training samples, and learning rate
-python3 write_noir_test.py --epochs $EPOCHS --samples-train $SAMPLES_TRAIN --learning-rate $LEARNING_RATE
+python3 helpers/write_noir_test.py --epochs $EPOCHS --samples-train $SAMPLES_TRAIN --learning-rate $LEARNING_RATE
 
 # Step 4: Run Noir tests
 cd noir_project
@@ -54,7 +54,7 @@ nargo test --show-output > ../noir_output.txt
 cd ..
 
 # Step 5: Parse Noir output
-python3 parse_noir_output.py --output-file noir_output.txt --quantized-file quantized.txt --features $FEATURES --classes $CLASSES
+python3 helpers/parse_noir_output.py --output-file noir_output.txt --quantized-file quantized.txt --features $FEATURES --classes $CLASSES
 
 # Step 6: Compute accuracy
-python3 compute_accuracy.py --quantized-file quantized.txt --test-data ./datasets/test_data.csv --classes $CLASSES --features $FEATURES --samples $SAMPLES_TEST
+python3 helpers/compute_accuracy.py --quantized-file quantized.txt --test-data ./datasets/test_data.csv --classes $CLASSES --features $FEATURES --samples $SAMPLES_TEST

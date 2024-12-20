@@ -43,7 +43,7 @@ fi
 
 # Step 1: Generate dataset with dynamic samples
 echo "Generating dataset..."
-python3 generate_dataset.py --dataset "$DATASET_NAME" --samples-train "$SAMPLES_TRAIN" --samples-test "$SAMPLES_TEST"
+python3 helpers/generate_dataset.py --dataset "$DATASET_NAME" --samples-train "$SAMPLES_TRAIN" --samples-test "$SAMPLES_TEST"
 if [ $? -ne 0 ]; then
     echo "Error: Dataset generation failed."
     exit 1
@@ -59,7 +59,7 @@ fi
 
 # Step 3: Generate Noir files
 echo "Generating Noir main.nr and Prover.toml..."
-python3 write_noir_main.py --metadata "$METADATA_FILE" --data "$TRAIN_DATA_FILE" --epochs "$EPOCHS" --samples-train "$SAMPLES_TRAIN" --learning-rate "$LEARNING_RATE" --output-dir "$PROJECT_DIR"
+python3 helpers/write_noir_main.py --metadata "$METADATA_FILE" --data "$TRAIN_DATA_FILE" --epochs "$EPOCHS" --samples-train "$SAMPLES_TRAIN" --learning-rate "$LEARNING_RATE" --output-dir "$PROJECT_DIR"
 if [ $? -ne 0 ]; then
     echo "Error: Noir file generation failed."
     exit 1
@@ -73,12 +73,18 @@ if [ ! -d "$PROJECT_DIR" ]; then
 fi
 
 pushd "$PROJECT_DIR" > /dev/null
-nargo execute
-if [ $? -ne 0 ]; then
-    echo "Error: Failed to compile the Noir project."
+
+# Capture both stdout and stderr from nargo execute
+NARGO_OUTPUT=$(nargo execute 2>&1)
+NARGO_EXIT_CODE=$?
+
+if [ $NARGO_EXIT_CODE -ne 0 ]; then
+    echo "Error: Failed to compile the Noir project. Details:"
+    echo "$NARGO_OUTPUT" # Print the captured output for debugging
     popd > /dev/null
     exit 1
 fi
+
 popd > /dev/null
 
 # Step 5: Check for compiled output

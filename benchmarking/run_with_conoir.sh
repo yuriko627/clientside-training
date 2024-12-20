@@ -6,7 +6,7 @@ SAMPLES_TRAIN=30
 SAMPLES_TEST=20
 DATASET_NAME="iris"
 LEARNING_RATE=0.1
-PROJECT_DIR="./noir_project"
+PROJECT_DIR="./conoir_project"
 TARGET_DIR="$PROJECT_DIR/target"
 
 # Parse arguments
@@ -58,50 +58,34 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Step 4: Compile the Noir project
-echo "Compiling Noir project..."
-if [ ! -d "$PROJECT_DIR" ]; then
-    echo "Error: Project directory $PROJECT_DIR does not exist!"
+# Step 4: Run the full MPC flow script in conoir_project
+CONOIR_SCRIPT="run_full_mpc_flow.sh"
+
+echo "Running full flow with conoir..."
+if [ -f "$PROJECT_DIR/$CONOIR_SCRIPT" ]; then
+    # Change to the project directory
+    cd "$PROJECT_DIR" || { echo "Error: Could not change to $PROJECT_DIR"; exit 1; }
+    
+    # Capture start time
+    START_TIME=$(date +%s)
+    
+    # Run the script
+    bash "$CONOIR_SCRIPT"
+    if [ $? -ne 0 ]; then
+        echo "Error: Full MPC flow script failed."
+        exit 1
+    fi
+    
+    # Capture end time
+    END_TIME=$(date +%s)
+    
+    # Calculate and display elapsed time
+    ELAPSED_TIME=$((END_TIME - START_TIME))
+    echo "Full MPC flow script completed in $ELAPSED_TIME seconds."
+    
+    # Return to the parent directory
+    cd ..
+else
+    echo "Error: Script '$PROJECT_DIR/$CONOIR_SCRIPT' not found."
     exit 1
 fi
-
-pushd "$PROJECT_DIR" > /dev/null
-nargo execute
-if [ $? -ne 0 ]; then
-    echo "Error: Failed to compile the Noir project."
-    popd > /dev/null
-    exit 1
-fi
-popd > /dev/null
-
-# Step 5: Check for compiled output
-echo "Checking for compiled output..."
-if [ ! -f "$TARGET_DIR/noir_project.json" ]; then
-    echo "Error: Compiled file noir_project.json not found in $TARGET_DIR."
-    exit 1
-fi
-
-# Step 6: Generate the proof
-echo "Generating proof..."
-if ! bb prove -b "$TARGET_DIR/noir_project.json" -w "$TARGET_DIR/noir_project.gz" -o "$TARGET_DIR/proof" 2>&1; then
-    echo "Error: Failed to generate proof."
-    exit 1
-fi
-
-# Step 7: Write verification key
-echo "Writing verification key..."
-bb write_vk -b "$TARGET_DIR/noir_project.json" -o "$TARGET_DIR/vk"
-if [ $? -ne 0 ]; then
-    echo "Error: Failed to write verification key."
-    exit 1
-fi
-
-# Step 8: Verify the proof
-echo "Verifying proof..."
-bb verify -k "$TARGET_DIR/vk" -p "$TARGET_DIR/proof"
-if [ $? -ne 0 ]; then
-    echo "Error: Proof verification failed."
-    exit 1
-fi
-
-echo "Proof successfully verified."

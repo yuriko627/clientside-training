@@ -26,4 +26,19 @@ for dir in "${DIRECTORIES[@]}"; do
     fi
 done
 
+# Run cleanup script from conoir_project
+CLEANUP_SCRIPT="./conoir_project/cleanup.sh"
+
+echo "Running cleanup script..."
+if [ -f "$CLEANUP_SCRIPT" ]; then
+    bash "$CLEANUP_SCRIPT"
+    if [ $? -ne 0 ]; then
+        echo "Error: Cleanup script failed."
+        exit 1
+    fi
+    echo "Cleanup completed successfully."
+else
+    echo "Error: Cleanup script '$CLEANUP_SCRIPT' not found."
+    exit 1
+fi
 echo "Cleanup completed."

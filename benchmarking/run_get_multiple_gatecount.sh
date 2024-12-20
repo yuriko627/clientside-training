@@ -47,7 +47,7 @@ for EPOCHS in "${EPOCHS_LIST[@]}"; do
 
         # Step 1: Generate dataset
         echo "Generating dataset..."
-        python3 generate_dataset.py --dataset "$DATASET_NAME" --samples-train "$SAMPLES_TRAIN"
+        python3 helpers/generate_dataset.py --dataset "$DATASET_NAME" --samples-train "$SAMPLES_TRAIN"
         if [ $? -ne 0 ]; then
             echo "Error: Dataset generation failed for epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN."
             continue
@@ -63,7 +63,7 @@ for EPOCHS in "${EPOCHS_LIST[@]}"; do
 
         # Step 3: Generate Noir files
         echo "Generating Noir main.nr and Prover.toml..."
-        python3 write_noir_main.py --metadata "$METADATA_FILE" --data "$TRAIN_DATA_FILE" --epochs "$EPOCHS" --samples-train "$SAMPLES_TRAIN" --learning-rate "$LEARNING_RATE" --output-dir "$PROJECT_DIR"
+        python3 helpers/write_noir_main.py --metadata "$METADATA_FILE" --data "$TRAIN_DATA_FILE" --epochs "$EPOCHS" --samples-train "$SAMPLES_TRAIN" --learning-rate "$LEARNING_RATE" --output-dir "$PROJECT_DIR"
         if [ $? -ne 0 ]; then
             echo "Error: Noir file generation failed for epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN."
             continue
@@ -111,6 +111,6 @@ TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 OUTPUT_CSV="benches/benchmarks__${DATASET_NAME}_${TIMESTAMP}.csv"
 
 # Step 7: Generate CSV from benchmarks
-python3 generate_gatecounts_csv.py --output "$OUTPUT_CSV"
+python3 helpers/generate_gatecounts_csv.py --output "$OUTPUT_CSV"
 
 echo "Benchmarking completed. CSV file created at $OUTPUT_CSV." | tee -a "$OUTPUT_BENCH"

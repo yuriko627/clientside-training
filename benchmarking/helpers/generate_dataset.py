@@ -20,11 +20,9 @@ def load_dataset(dataset_name):
         return datasets.load_digits()
     elif dataset_name == "diabetes":
         return datasets.load_diabetes()
-    elif dataset_name == "linnerud":
-        return datasets.load_linnerud()
     else:
         raise ValueError(f"Dataset '{dataset_name}' is not supported. Available options: "
-                         f"iris, wine, digits, diabetes, linnerud.")
+                         f"iris, wine, digits, diabetes.")
 
 if __name__ == "__main__":
     # Parse command-line arguments

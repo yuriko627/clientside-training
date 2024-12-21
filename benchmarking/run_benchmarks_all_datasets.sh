@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Datasets to benchmark
-DATASETS=("iris" "wine" "digits" "diabetes" "linnerud")
+DATASETS=("iris" "wine" "digits")
 
 # Parameter ranges
 EPOCHS_LIST=(10 20 30)

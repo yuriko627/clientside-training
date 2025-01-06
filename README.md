@@ -99,8 +99,8 @@ In the representation, the fixed-point numbers are represented by a `Field`
 element that is wrapped in the `Quantized` struct. This field element will
 represent a fractional number that has $k$ bits in total and $f$ of those $k$
 bits are used to represent the decimal part. We will denote this set of
-fractional numbers as $\mathbb{Q}_{\langle k, f \rangle}$. An element
-$\tilde{x} \in \mathbb{Q}_{\langle k, f \rangle}$ can be encoded as a `Field`
+fractional numbers as $\mathbb{Q}\_{\langle k, f \rangle}$. An element
+$\tilde{x} \in \mathbb{Q}\_{\langle k, f \rangle}$ can be encoded as a `Field`
 element by computing $(x = \tilde{x} \cdot 2^{-f}) \mod p$ where $p$ is the order
 of the `Field`. Adding two `Quantized` elements corresponds to add both encodings.
 However, the multiplication requires a truncation given that multiplying both encodings

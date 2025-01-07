@@ -65,14 +65,14 @@ if [ ! -d "$PROJECT_DIR" ]; then
     exit 1
 fi
 
-pushd "$PROJECT_DIR" > /dev/null
+pushd "$PROJECT_DIR" > /dev/null || (echo "pushd failed" && exit 1)
 nargo execute
 if [ $? -ne 0 ]; then
     echo "Error: Failed to compile the Noir project."
-    popd > /dev/null
+    popd > /dev/null || (echo "popd failed" && exit 1)
     exit 1
 fi
-popd > /dev/null
+popd > /dev/null || (echo "popd failed" && exit 1)
 
 # Step 5: Check for compiled output
 echo "Checking for compiled output..."

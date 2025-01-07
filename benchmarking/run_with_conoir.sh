@@ -7,7 +7,6 @@ SAMPLES_TEST=20
 DATASET_NAME="iris"
 LEARNING_RATE=0.1
 PROJECT_DIR="./conoir_project"
-TARGET_DIR="$PROJECT_DIR/target"
 
 # Parse arguments
 for arg in "$@"; do

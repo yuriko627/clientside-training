@@ -33,7 +33,7 @@ for arg in "$@"; do
 done
 
 # Step 1: Generate dataset with dynamic samples
-python3 helpers/generate_dataset.py --dataset $DATASET_NAME --samples-train $SAMPLES_TRAIN --samples-test $SAMPLES_TEST
+python3 helpers/generate_dataset.py --dataset "$DATASET_NAME" --samples-train "$SAMPLES_TRAIN" --samples-test $SAMPLES_TEST
 
 # Step 2: Load metadata
 METADATA_FILE="./datasets/metadata.json"
@@ -46,10 +46,10 @@ FEATURES=$(jq .features $METADATA_FILE)
 CLASSES=$(jq .classes $METADATA_FILE)
 
 # Step 3: Adjust Noir code with dynamic epochs, training samples, and learning rate
-python3 helpers/write_noir_test.py --epochs $EPOCHS --samples-train $SAMPLES_TRAIN --learning-rate $LEARNING_RATE
+python3 helpers/write_noir_test.py --epochs "$EPOCHS" --samples-train "$SAMPLES_TRAIN" --learning-rate $LEARNING_RATE
 
 # Step 4: Run Noir tests
-cd noir_project
+cd noir_project || (echo "The folder does not exist" && exit 1)
 nargo test --show-output > ../noir_output.txt
 cd ..
 

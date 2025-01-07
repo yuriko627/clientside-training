@@ -72,7 +72,7 @@ if [ ! -d "$PROJECT_DIR" ]; then
     exit 1
 fi
 
-pushd "$PROJECT_DIR" > /dev/null
+pushd "$PROJECT_DIR" > /dev/null || (echo "pushd failed" && exit 1)
 
 # Capture both stdout and stderr from nargo execute
 NARGO_OUTPUT=$(nargo execute 2>&1)
@@ -81,11 +81,11 @@ NARGO_EXIT_CODE=$?
 if [ $NARGO_EXIT_CODE -ne 0 ]; then
     echo "Error: Failed to compile the Noir project. Details:"
     echo "$NARGO_OUTPUT" # Print the captured output for debugging
-    popd > /dev/null
+    popd > /dev/null || (echo "popd failed" && exit 1)
     exit 1
 fi
 
-popd > /dev/null
+popd > /dev/null || (echo "popd failed" && exit 1)
 
 # Step 5: Check for compiled output
 echo "Checking for compiled output..."

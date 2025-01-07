@@ -38,7 +38,7 @@ if [ ! -d "$OUT_DIR" ]; then
 fi
 
 # Clear the benchmark file
-> "$OUTPUT_BENCH"
+> "$OUTPUT_BENCH" 
 
 # Loop through parameter combinations
 for EPOCHS in "${EPOCHS_LIST[@]}"; do
@@ -76,14 +76,14 @@ for EPOCHS in "${EPOCHS_LIST[@]}"; do
             continue
         fi
 
-        pushd "$PROJECT_DIR" > /dev/null
+        pushd "$PROJECT_DIR" > /dev/null || (echo "pushd failed" && exit 1)
         nargo execute
         if [ $? -ne 0 ]; then
             echo "Error: Failed to compile the Noir project for epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN."
-            popd > /dev/null
+            popd > /dev/null || (echo "popd failed" && exit 1)
             continue
         fi
-        popd > /dev/null
+        popd > /dev/null || (echo "popd failed" && exit 1)
 
         # Step 5: Check for compiled output
         echo "Checking for compiled output..."
@@ -94,8 +94,10 @@ for EPOCHS in "${EPOCHS_LIST[@]}"; do
 
         # Step 6: Get gatecount for current params
         echo "Getting gatecount..."
-        echo "epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN" >> "$OUTPUT_BENCH"
-        bb gates -b "$TARGET_DIR/noir_project.json" >> "$OUTPUT_BENCH"
+        {
+            echo "epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN" 
+            bb gates -b "$TARGET_DIR/noir_project.json"
+        } >> "$OUTPUT_BENCH"
         echo "===" >> "$OUTPUT_BENCH"
         if [ $? -ne 0 ]; then
             echo "Error: Failed to get gatecount for epochs=$EPOCHS, samples_train=$SAMPLES_TRAIN."

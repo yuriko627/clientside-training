@@ -1,4 +1,4 @@
-# Benchmarking for ML lib
+# Benchmarking for the logistic regression library 
 
 We created a script to benchmark the logistic regression library. The script does the following:
 1. Takes train & test data from a dataset in sklearn.

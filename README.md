@@ -64,24 +64,44 @@ $N$ is the number of samples and $C$ is the number of classes. The `labels`
 matrix will have a 1 in the position $(i, c)$ if the $i$-th sample is of class
 $c$, otherwise, the entry will have a 0.
 
-## Benchmarks (WIP)
+## Benchmarks
 
-For iris dataset. Check `benchmarking` folder to run benchmarks and tests. 
-```
-epochs,samples_train,acir_opcodes,circuit_size
-5,10,156595,233384
-5,20,260650,387935
-5,30,364726,542162
-5,40,468576,696830
-10,10,339976,505226
-10,20,573556,854462
-10,30,807142,1203194
-10,40,1040292,1552532
-15,10,523789,777749
-15,20,886834,1321910
-15,30,1249870,1865387
-15,40,1612260,2409635
-```
+We executed benchmarks for the logistic regression library using the Iris and the Wine datasets. To execute these benchmarks yourself, you can go to the `benchmarks/` folder in which you will find instruction to execute and test the library.
+
+### Number of gates
+
+In the following tables, we present the number of gates for different epochs and number of training samples using the Iris and the Wine dataset. The number of gates is measured using the Noir tooling.
+
+#### For the Iris dataset
+
+| **Epochs** | **# of train samples** | **ACIR opcodes** | **# of gates** |
+|:----------:|------------------------|------------------|----------------|
+|         10 |                     20 |           573,556 |         854,462 |
+|         10 |                     60 |          1,507,108 |        2,250,434 |
+|         10 |                    100 |          2,440,660 |        3,646,936 |
+|         20 |                     20 |          1,199,518 |        1,788,902 |
+|         30 |                     20 |          1,825,639 |        2,726,816 |
+
+#### For the Wine dataset
+
+| **Epochs** | **# of train samples** | **ACIR opcodes** | **# of gates** |
+|:----------:|------------------------|------------------|----------------|
+|         10 |                     20 |          792,313 |      1,168,109 |
+|         10 |                     60 |        1,761,142 |      2,607,698 |
+|         10 |                    100 |        2,729,836 |      4,047,862 |
+|         20 |                     20 |        1,638,775 |      2,417,639 |
+|         30 |                     20 |        2,485,396 |      3,670,703 |
+
+### Training using co-noir
+
+The following table shows the training time using co-noir for the Iris dataset using a server with an AMD EPYC Processor and 32 GB of RAM.
+
+| Epochs | # of train samples | Training time [sec] |
+|--------|--------------------|----------------------|
+|     10 |                 30 |                3,162 |
+|     10 |                 50 |                4,971 |
+|     20 |                 30 |                6,105 |
+|     20 |                 50 |                9,969 |
 
 ## Fixed-point arithmetic
 

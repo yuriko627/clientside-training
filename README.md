@@ -76,7 +76,7 @@ In the following tables, we present the number of gates for different epochs and
 
 | **Epochs** | **# of train samples** | **ACIR opcodes** | **# of gates** |
 |:----------:|------------------------|------------------|----------------|
-|         10 |                     20 |          231,396 |        854,462 |
+|         10 |                     20 |          231,396 |        402,403 |
 |         10 |                     60 |          618,684 |      2,250,434 |
 |         20 |                     20 |          484,164 |      3,646,936 |
 |         20 |                     60 |        1,299,372 |      1,788,902 |

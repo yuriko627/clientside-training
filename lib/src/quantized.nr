@@ -1,6 +1,6 @@
-use std::ops::{Add, Sub, Mul};
 use std::cmp::Ordering;
 use std::field::bn254::decompose;
+use std::ops::{Add, Mul, Sub};
 
 // Scale 2^-16 = 0.0000152587890625 (divide by 65536)
 // p = 21888242871839275222246405745257275088548364400416034343698204186575808495617
@@ -40,26 +40,20 @@ impl Quantized {
 
     fn mul(self: Self, other: Self) -> Self {
         let mut temp: Field = self.x * other.x;
+        let negative = is_negative(temp);
+
+        temp = negative
+            * (
+                21888242871839275222246405745257275088548364400416034343698204186575808495616 - temp
+                    + 1
+                    - temp
+            )
+            + temp;
         let mut bytes: [u8; 32] = [0; 32];
         unsafe {
             bytes = get_bytes(temp);
         }
-
         assert(Field::from_be_bytes::<32>(bytes) == temp);
-
-        let negative = is_negative(temp);
-
-        // To correctly scale down we temporary flip the sign
-        if negative == 1 {
-            temp = 21888242871839275222246405745257275088548364400416034343698204186575808495616
-                - temp
-                + 1;
-            unsafe {
-                bytes = get_bytes(temp);
-            }
-
-            assert(Field::from_be_bytes::<32>(bytes) == temp);
-        }
 
         // Chop off 2 bytes to scale down by 2^16 and truncate
         let mut truncated: [u8; 32] = [0; 32];
@@ -70,11 +64,14 @@ impl Quantized {
 
         let mut new_x: Field = Field::from_be_bytes::<32>(truncated);
         // Flip back sign if the output is negative
-        if negative == 1 {
-            new_x = 21888242871839275222246405745257275088548364400416034343698204186575808495616
-                - new_x
-                + 1;
-        }
+        new_x = negative
+            * (
+                21888242871839275222246405745257275088548364400416034343698204186575808495616
+                    - new_x
+                    + 1
+                    - new_x
+            )
+            + new_x;
 
         Quantized { x: new_x }
     }
@@ -85,20 +82,20 @@ impl Quantized {
 pub fn scale_down(x: Field) -> Field {
     let mut z = x;
     let mut bytes: [u8; 32] = [0; 32];
+
+    let negative = is_negative(z);
+
+    z = negative
+        * (
+            21888242871839275222246405745257275088548364400416034343698204186575808495616 - z + 1
+                - z
+        )
+        + z;
     unsafe {
         bytes = get_bytes(z);
     }
     assert(Field::from_be_bytes::<32>(bytes) == z);
-    let negative = is_negative(z);
 
-    if negative == 1 {
-        z = 21888242871839275222246405745257275088548364400416034343698204186575808495616 - z + 1;
-        unsafe {
-            bytes = get_bytes(z);
-        }
-
-        assert(Field::from_be_bytes::<32>(bytes) == z);
-    }
     // Now scale down with the same trick as in Quantized mul
     let mut truncated: [u8; 32] = [0; 32];
     for i in 0..30 {
@@ -106,12 +103,16 @@ pub fn scale_down(x: Field) -> Field {
     }
 
     let mut new_x: Field = Field::from_be_bytes::<32>(truncated);
+
     // Flip back sign if the output is negative
-    if negative == 1 {
-        new_x = 21888242871839275222246405745257275088548364400416034343698204186575808495616
-            - new_x
-            + 1;
-    }
+    new_x = negative
+        * (
+            21888242871839275222246405745257275088548364400416034343698204186575808495616 - new_x
+                + 1
+                - new_x
+        )
+        + new_x;
+
     new_x
 }
 

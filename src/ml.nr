@@ -1,5 +1,5 @@
-use crate::quantized::Quantized;
-use super::quantized::scale_down;
+use super::utils::scale_down;
+use noir_fixed_point::quantized::Quantized;
 
 fn approx_sigmoid(x: Quantized) -> Quantized {
     // Follows https://github.com/data61/MP-SPDZ/blob/master/Compiler/ml.py#L110

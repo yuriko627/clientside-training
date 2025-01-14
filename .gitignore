@@ -6,3 +6,4 @@ include
 datasets
 scripts/float.txt
 scripts/quantized.txt
+.vscode

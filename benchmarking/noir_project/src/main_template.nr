@@ -1,5 +1,5 @@
 use noir_mpc_ml::ml::{train, train_multi_class};
-use noir_mpc_ml::quantized::Quantized;
+use fixedpoint::quantized::Quantized;
 
 fn main(x: Field, y: pub Field) {
     assert(x != y);

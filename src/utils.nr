@@ -23,13 +23,16 @@ pub fn scale_down(x: Field) -> Field {
     }
     assert(Field::from_be_bytes::<32>(bytes) == z);
 
-    // Now scale down with the same trick as in Quantized mul
-    let mut truncated: [u8; 32] = [0; 32];
-    for i in 0..30 {
-        truncated[i + 2] = bytes[i];
-    }
+    // Division by 2^16, code as suggested by Tom French @TomAFrench
+    // Cast x to a u16 to preserve only the lowest 16 bits.
+    let lowest_16_bits = z as u16;
 
-    let mut new_x: Field = Field::from_be_bytes::<32>(truncated);
+    // Subtract off the lowest 16 bits so they are cleared.
+    let x_with_cleared_lower_bits = z - lowest_16_bits as Field;
+
+    // The lowest 16 bits are clear, `x_with_cleared_lower_bits` is divisible by `65536`,
+    // therefore field division is equivalent to integer division.
+    let mut new_x: Field = x_with_cleared_lower_bits / 65536;
 
     // Flip back sign if the output is negative
     new_x = negative

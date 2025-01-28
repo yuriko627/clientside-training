@@ -49,9 +49,14 @@ CLASSES=$(jq .classes $METADATA_FILE)
 python3 helpers/write_noir_test.py --epochs "$EPOCHS" --samples-train "$SAMPLES_TRAIN" --learning-rate "$LEARNING_RATE"
 
 # Step 4: Run Noir tests
-cd noir_project || (echo "The folder does not exist" && exit 1)
-nargo test --show-output > ../noir_output.txt
-cd ..
+if cd noir_project; then
+    # Ensure we are in the correct directory
+    nargo test test_train --show-output > ../noir_output.txt 2>&1
+    cd .. # Return to the parent directory
+else
+    echo "The folder 'noir_project' does not exist or could not be accessed!"
+    exit 1
+fi
 
 # Step 5: Parse Noir output
 python3 helpers/parse_noir_output.py --output-file noir_output.txt --quantized-file quantized.txt --features "$FEATURES" --classes "$CLASSES"

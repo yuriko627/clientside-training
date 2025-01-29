@@ -1,4 +1,5 @@
-use noir_fixed_point::quantized::is_negative;
+use noir_fixed_point::quantized::{is_negative, Quantized};
+use std::field::bn254::decompose;
 
 pub unconstrained fn get_bytes(x: Field) -> [u8; 32] {
     x.to_be_bytes()
@@ -44,4 +45,81 @@ pub fn scale_down(x: Field) -> Field {
         + new_x;
 
     new_x
+}
+
+// Assert that number of bits <= bitsize
+// if quantized is negative, it count the bits backwards
+pub fn assert_bitsize<let bitsize: u32>(q: Quantized) {
+    // Decomposes into two 128 bits chunks
+    let (_, higher_bytes) = decompose(q.x);
+    if higher_bytes == 0 {
+        // positive number
+        q.x.assert_max_bit_size::<bitsize>();
+    } else {
+        // negative number
+        (-q.x).assert_max_bit_size::<bitsize>();
+    }
+}
+
+#[test]
+fn test_assert_bitsize() {
+    // 4 bits
+    assert_bitsize::<4>(Quantized { x: 10 });
+    assert_bitsize::<4>(Quantized { x: -10 });
+
+    // 100 bits
+    assert_bitsize::<100>(Quantized { x: 1267650600228229401496703205375 });
+    assert_bitsize::<100>(Quantized { x: -1267650600228229401496703205375 });
+
+    // 127 bits
+    assert_bitsize::<127>(Quantized { x: 170141183460469231731687303715884105727 });
+    assert_bitsize::<127>(Quantized { x: -170141183460469231731687303715884105727 });
+}
+
+#[test(should_fail)]
+fn test_fail_assert_bitsize127() {
+    // 131 bits
+    assert_bitsize::<127>(Quantized { x: 1361129467683753853853498429727072845824 });
+}
+
+#[test(should_fail)]
+fn test_fail_assert_bitsize127_neg() {
+    // 131 bits
+    assert_bitsize::<127>(Quantized { x: -1361129467683753853853498429727072845824 });
+}
+
+#[test(should_fail)]
+fn test_fail_assert_bitsize1() {
+    // 4 bits
+    assert_bitsize::<3>(Quantized { x: 10 });
+}
+
+#[test(should_fail)]
+fn test_fail_assert_bitsize2() {
+    // 4 bits
+    assert_bitsize::<3>(Quantized { x: -10 });
+}
+
+#[test(should_fail)]
+fn test_fail_assert_bitsize3() {
+    // 100 bits
+    assert_bitsize::<99>(Quantized { x: 1267650600228229401496703205375 });
+}
+
+#[test(should_fail)]
+fn test_fail_assert_bitsize4() {
+    // 100 bits
+    assert_bitsize::<99>(Quantized { x: -1267650600228229401496703205375 });
+}
+
+#[test(should_fail)]
+fn test_fail_assert_bitsize5() {
+    // 127 bits
+    assert_bitsize::<126>(Quantized { x: 170141183460469231731687303715884105727 });
+}
+
+#[test(should_fail)]
+fn test_fail_assert_bitsize6() {
+    // 127 bits
+    assert_bitsize::<126>(Quantized { x: -170141183460469231731687303715884105727 });
 }

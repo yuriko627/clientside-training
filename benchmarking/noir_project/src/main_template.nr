@@ -17,18 +17,16 @@ fn test_train() {
 
     let epochs = // EPOCHS_PLACEHOLDER;
 
-    let learning_rate = Quantized::new(
-        // LEARNING_RATE_PLACEHOLDER
+    let learning_rate_ratio = Quantized::new(
+        // LEARNING_RATE_RATIO_PLACEHOLDER
     );
-    let ratio = Quantized::new(
-        // RATIO_PLACEHOLDER
-    );
+
     let parameters = train_multi_class(
         epochs,
         inputs,
         labels,
-        learning_rate,
-        ratio,
+        learning_rate_ratio,
     );
+
     println(parameters);
 }

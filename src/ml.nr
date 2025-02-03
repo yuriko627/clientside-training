@@ -22,7 +22,7 @@ fn approx_sigmoid(x: Quantized) -> Quantized {
     let outputs = [
         Quantized::new(6), // 0.0001, 0.0001 / 2^-16 = 6.5536
         temp + Quantized::new(9502), //0.02776 and 0.145, 0.02776 / 2^-16 = 1819.27936, 0.145/2^-16 = 9502.72
-        (Quantized::new(11141) * x) + Quantized::new(32768), //0.17 and 0.5, 0.17 / 2^-16 = 11141.12, 0.5/2^-16 = 32768
+        (Quantized::new(11141) * x) + Quantized::new(32768), // 15 bits //0.17 and 0.5, 0.17 / 2^-16 = 11141.12, 0.5/2^-16 = 32768
         temp + Quantized::new(56031), //0.02776 and 0.85498, 0.85498/2^-16 = 56031.96928
         Quantized::new(65529), //0.9999 / 2^-16 = 65529.4464
     ];
@@ -47,18 +47,29 @@ fn get_prediction<let M: u32>(
     bias: Quantized,
 ) -> Quantized {
     // let z = weights dot_product inputs
+
+    // Epoch 0:
+    // weigths: 0 bits.
+    // inputs: 20 bits.
+
     let mut z = 0;
     for i in 0..M {
+        // Epoch 0:
+        // z: 0 bits.
+
         // Perform operations directly on Field elements, scale down at the end
         // rhs multiplication will not immediately overflow, but we don't want 
-        // z to become more than 127 bits. 
+        // z to become more than 126 bits. 
+        assert_bitsize::<106>(weights[i].x)
         z += weights[i].x * inputs[i].x;
-        assert_bitsize::<127>(Quantized{x:z});
     }
 
+    // z has 126 - 16 bits = 110 bits at this point.
+    // bias has 125 bits.
     let temp: Quantized = Quantized { x: scale_down(z) } + bias;
-    assert_bitsize::<127>(temp);
     // Scale the intermediate value down due to multiplications and add bias
+
+    // Epoch 0: 15 bits. 
     approx_sigmoid(temp)
 }
 
@@ -76,36 +87,41 @@ pub fn train<let N: u32, let M: u32>(
         let mut bias_gradient = Quantized::zero();
 
         for j in 0..N {
+            // Epoch 0: 15 bits.
             let prediction = get_prediction(final_weights, inputs[j], final_bias);
             // from epoch=1, prediction always returns max 35 bits
+            // Epoch 0: 
             let error = prediction - labels[j];
             // starting from epoch=1, error is max 36 bits
 
             // Compute gradients
             for m in 0..M {
+                // Inputs always have 20 bits.
+                // The multiplication has 56 bits.
+                assert_bitsize::<125>(weight_gradient[m]);
                 weight_gradient[m].x += (inputs[j][m].x * error.x);
-                assert_bitsize::<127>(weight_gradient[m]);
             }
-
+            assert_bitsize::<125>(bias_gradient);
             bias_gradient += error;
-            assert_bitsize::<127>(bias_gradient);
         }
 
         // Scale down weight_gradients (due to multiplications without scaling)
         for m in 0..M {
             weight_gradient[m].x = scale_down(weight_gradient[m].x);
-            // weight_gradient[m] were already constrained to 127 bits, 
-            // now minus 16 bits => max 111 bits
+            // weight_gradient[m] were already constrained to 126 bits, 
+            // now minus 16 bits => max 110 bits
         }
 
         // Update weights and bias using the gradients
         for m in 0..M {
-            // weight_gradient[m] is max 111 bits, learning_rate_ratio is max 11 bits, so rhs doesn't overflow
+            // weight_gradient[m] is max 110 bits, learning_rate_ratio is max 11 bits, so rhs doesn't overflow
+            assert_bitsize::<125>(final_weights[m]); // constraining this because gets updated over and over
             final_weights[m] -= (weight_gradient[m] * learning_rate_ratio);
-            assert_bitsize::<127>(final_weights[m]); // constraining this because gets updated over and over
         }
+    
+        assert_bitsize::<124>(final_bias);
+        assert_bitsize::<115>(bias_gradient);
         final_bias -= (bias_gradient * learning_rate_ratio);
-        assert_bitsize::<127>(final_bias);
     }
     (final_weights, final_bias)
 }

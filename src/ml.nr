@@ -1,5 +1,7 @@
-use super::utils::{scale_down, assert_bitsize};
+use super::utils::{assert_bitsize, scale_down};
 use noir_fixed_point::quantized::Quantized;
+
+// Restricting Quantized use to 126 bits on either sides (positive and negative)
 
 // output upper limit 35 bits
 fn approx_sigmoid(x: Quantized) -> Quantized {
@@ -48,28 +50,21 @@ fn get_prediction<let M: u32>(
 ) -> Quantized {
     // let z = weights dot_product inputs
 
-    // Epoch 0:
-    // weigths: 0 bits.
-    // inputs: 20 bits.
-
     let mut z = 0;
     for i in 0..M {
-        // Epoch 0:
-        // z: 0 bits.
-
         // Perform operations directly on Field elements, scale down at the end
-        // rhs multiplication will not immediately overflow, but we don't want 
-        // z to become more than 126 bits. 
-        assert_bitsize::<106>(weights[i].x)
+        // rhs multiplication: inputs have already been restricted to 20 bits, so weights
+        // get restricted to 105
+        assert_bitsize::<105>(weights[i]);
+        // Restrict z to 125 bits, so the addition won't overflow
+        assert_bitsize::<125>(Quantized { x: z });
         z += weights[i].x * inputs[i].x;
     }
 
-    // z has 126 - 16 bits = 110 bits at this point.
-    // bias has 125 bits.
-    let temp: Quantized = Quantized { x: scale_down(z) } + bias;
     // Scale the intermediate value down due to multiplications and add bias
-
-    // Epoch 0: 15 bits. 
+    // z has 125 - 16 bits = 109 bits at this point, because of scaling down
+    // bias has 125 bits (gets restricted in `train` function)
+    let temp: Quantized = Quantized { x: scale_down(z) } + bias;
     approx_sigmoid(temp)
 }
 
@@ -87,20 +82,20 @@ pub fn train<let N: u32, let M: u32>(
         let mut bias_gradient = Quantized::zero();
 
         for j in 0..N {
-            // Epoch 0: 15 bits.
             let prediction = get_prediction(final_weights, inputs[j], final_bias);
-            // from epoch=1, prediction always returns max 35 bits
-            // Epoch 0: 
+            // prediction outputs a value of max 35 bits (specifically due to logic in approx_sigmoid)
+            // labels are constrained to 17 bits (in `train_multi_class`)
+            // => error has max 36 bits
             let error = prediction - labels[j];
-            // starting from epoch=1, error is max 36 bits
 
             // Compute gradients
             for m in 0..M {
-                // Inputs always have 20 bits.
-                // The multiplication has 56 bits.
+                // rhs: input has 20 bits, error 36 bits => 56 bits result
+                // Restrict weight_gradient to 125 to prevent overflow in addition
                 assert_bitsize::<125>(weight_gradient[m]);
                 weight_gradient[m].x += (inputs[j][m].x * error.x);
             }
+            // Restrict bias_gradient to 125 to prevent overflow in addition
             assert_bitsize::<125>(bias_gradient);
             bias_gradient += error;
         }
@@ -108,19 +103,21 @@ pub fn train<let N: u32, let M: u32>(
         // Scale down weight_gradients (due to multiplications without scaling)
         for m in 0..M {
             weight_gradient[m].x = scale_down(weight_gradient[m].x);
-            // weight_gradient[m] were already constrained to 126 bits, 
+            // weight_gradient[m] at this point is max 126 bits,
             // now minus 16 bits => max 110 bits
         }
 
         // Update weights and bias using the gradients
         for m in 0..M {
-            // weight_gradient[m] is max 110 bits, learning_rate_ratio is max 11 bits, so rhs doesn't overflow
-            assert_bitsize::<125>(final_weights[m]); // constraining this because gets updated over and over
+            // weight_gradient[m] is max 110 bits, learning_rate_ratio is max 11 bits, so rhs has max 121 bits
+            assert_bitsize::<125>(final_weights[m]);
             final_weights[m] -= (weight_gradient[m] * learning_rate_ratio);
         }
-    
+
+        // Keep final_bias at max 125 bits (need for get_prediction)
+        // learning_rate_ratio has max 11 bits, so constrain the other 2
         assert_bitsize::<124>(final_bias);
-        assert_bitsize::<115>(bias_gradient);
+        assert_bitsize::<114>(bias_gradient);
         final_bias -= (bias_gradient * learning_rate_ratio);
     }
     (final_weights, final_bias)
@@ -130,7 +127,7 @@ pub fn train_multi_class<let N: u32, let M: u32, let C: u32>(
     epochs: u64,
     inputs: [[Quantized; M]; N],
     labels: [[Quantized; N]; C],
-    learning_rate_ratio: Quantized 
+    learning_rate_ratio: Quantized,
     // learning_rate*ratio, where ratio=1/nr_samples. We cap this at 0.1*0.1=0.01 => 655 is 11 bits
 ) -> [([Quantized; M], Quantized); C] {
     // Assert all inputs have max 20 bits
@@ -140,15 +137,15 @@ pub fn train_multi_class<let N: u32, let M: u32, let C: u32>(
             assert_bitsize::<20>(inputs[i][j]);
         }
     }
-    
+
     // Assert ratio*learning_rate <= 11 bits
     assert_bitsize::<11>(learning_rate_ratio);
 
     // Assert all labels <= 17 bits (they are either 0 or 1 and 1 is 65536 in quantized)
     for i in 0..C {
-      for j in 0..N {
-        assert_bitsize::<17>(labels[i][j]);
-      }
+        for j in 0..N {
+            assert_bitsize::<17>(labels[i][j]);
+        }
     }
 
     let mut result_parameters = [([Quantized { x: 0 }; M], Quantized { x: 0 }); C];
@@ -451,7 +448,7 @@ fn test_ml_training() {
         epochs,
         inputs,
         [labels_0, labels_1, label_2],
-        learning_rate_ratio
+        learning_rate_ratio,
     );
     println(parameters);
     /*

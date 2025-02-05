@@ -24,7 +24,7 @@ fn approx_sigmoid(x: Quantized) -> Quantized {
     let outputs = [
         Quantized::new(6), // 0.0001, 0.0001 / 2^-16 = 6.5536
         temp + Quantized::new(9502), //0.02776 and 0.145, 0.02776 / 2^-16 = 1819.27936, 0.145/2^-16 = 9502.72
-        (Quantized::new(11141) * x) + Quantized::new(32768), // 15 bits //0.17 and 0.5, 0.17 / 2^-16 = 11141.12, 0.5/2^-16 = 32768
+        (Quantized::new(11141) * x) + Quantized::new(32768), //0.17 and 0.5, 0.17 / 2^-16 = 11141.12, 0.5/2^-16 = 32768
         temp + Quantized::new(56031), //0.02776 and 0.85498, 0.85498/2^-16 = 56031.96928
         Quantized::new(65529), //0.9999 / 2^-16 = 65529.4464
     ];

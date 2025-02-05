@@ -62,7 +62,7 @@ fn get_prediction<let M: u32>(
     }
 
     // Scale the intermediate value down due to multiplications and add bias
-    // z has 125 - 16 bits = 109 bits at this point, because of scaling down
+    // z has 126 - 16 bits = 110 bits at this point, because of scaling down
     // bias has 125 bits (gets restricted in `train` function)
     let temp: Quantized = Quantized { x: scale_down(z) } + bias;
     approx_sigmoid(temp)
@@ -117,7 +117,7 @@ pub fn train<let N: u32, let M: u32>(
         // Keep final_bias at max 125 bits (need for get_prediction)
         // learning_rate_ratio has max 11 bits, so constrain the other 2
         assert_bitsize::<124>(final_bias);
-        assert_bitsize::<114>(bias_gradient);
+        assert_bitsize::<113>(bias_gradient);
         final_bias -= (bias_gradient * learning_rate_ratio);
     }
     (final_weights, final_bias)

@@ -3,7 +3,7 @@ import argparse
 
 SCALE = 2**16  # Scale factor for quantization
 
-def generate_noir_code(samples_train, epochs, learning_rate, ratio, num_features, num_classes):
+def generate_noir_code(samples_train, epochs, learning_rate_ratio, num_features, num_classes):
     """
     Generate the Noir `main.nr` code.
     """
@@ -12,14 +12,10 @@ use noir_mpc_ml::ml::train_multi_class;
 use fixedpoint::quantized::Quantized;
 
 fn main(inputs: [[Quantized; {num_features}]; {samples_train}], labels: [[Quantized; {samples_train}]; {num_classes}]) -> pub [([Quantized; {num_features}], Quantized); {num_classes}] {{
-    let learning_rate = {learning_rate};
-    let ratio = {ratio};
-
     let epochs = {epochs};
+    let learning_rate_ratio = Quantized::new({learning_rate_ratio});
 
-    let learning_rate = Quantized::new(learning_rate);
-    let ratio = Quantized::new(ratio);
-    let parameters = train_multi_class(epochs, inputs, labels, learning_rate, ratio);
+    let parameters = train_multi_class(epochs, inputs, labels, learning_rate_ratio);
     parameters
 }}
 """
@@ -82,15 +78,16 @@ def main():
     num_features = metadata["features"]
     num_classes = metadata["classes"]
     samples_train = args.samples_train
-    learning_rate = round(args.learning_rate * SCALE)
-    ratio = round(SCALE / samples_train)
+
+    # Compute learning_rate_ratio = round(learning_rate / samples_train) * SCALE for better precision
+    learning_rate_ratio = round((args.learning_rate * SCALE) / samples_train)
 
     # Extract features and labels
     features = [row["features"] for row in train_data[:samples_train]]
     labels = extract_labels(train_data, samples_train)
 
     # Generate Noir code and Prover.toml
-    noir_code = generate_noir_code(samples_train, args.epochs, learning_rate, ratio, num_features, num_classes)
+    noir_code = generate_noir_code(samples_train, args.epochs, learning_rate_ratio, num_features, num_classes)
     prover_toml = generate_prover_toml(features, labels)
 
     # Write Noir code to /src

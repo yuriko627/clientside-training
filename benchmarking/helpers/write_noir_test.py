@@ -13,7 +13,7 @@ def format_labels(labels):
         for class_labels in labels
     )
 
-def replace_placeholders(template, inputs, labels, epochs, ratio, learning_rate):
+def replace_placeholders(template, inputs, labels, epochs, learning_rate_ratio):
     """
     Replace placeholders in the Noir template with actual data.
     """
@@ -22,8 +22,7 @@ def replace_placeholders(template, inputs, labels, epochs, ratio, learning_rate)
         .replace("// INPUTS_PLACEHOLDER", ",\n        ".join(inputs))
         .replace("// LABELS_PLACEHOLDER", format_labels(labels))
         .replace("// EPOCHS_PLACEHOLDER", str(epochs))
-        .replace("// RATIO_PLACEHOLDER", str(ratio))
-        .replace("// LEARNING_RATE_PLACEHOLDER", str(learning_rate))
+        .replace("// LEARNING_RATE_RATIO_PLACEHOLDER", str(learning_rate_ratio))
     )
 
 if __name__ == "__main__":
@@ -35,10 +34,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     SAMPLES_TRAIN = args.samples_train
-    # Calculate ratio based on the hardcoded samples_train
-    ratio = round(SCALE / SAMPLES_TRAIN)  # Compute 1/n * SCALE
-    learning_rate = round(args.learning_rate * SCALE)
-    
+
+    # Compute learning_rate_ratio = (learning_rate / samples_train) * SCALE
+    learning_rate_ratio = round((args.learning_rate * SCALE) / SAMPLES_TRAIN)
+
     # Load dataset
     with open("./datasets/train_data.json", "r") as f:
         dataset = json.load(f)
@@ -64,7 +63,7 @@ if __name__ == "__main__":
         template = f.read()
 
     # Replace placeholders in the template
-    updated_code = replace_placeholders(template, inputs, grouped_labels, args.epochs, ratio, learning_rate)
+    updated_code = replace_placeholders(template, inputs, grouped_labels, args.epochs, learning_rate_ratio)
 
     # Write updated code to main.nr
     with open("./noir_project/src/main.nr", "w") as f:

@@ -1,15 +1,10 @@
 use noir_fixed_point::quantized::{is_negative, Quantized};
 use std::field::bn254::decompose;
 
-pub unconstrained fn get_bytes(x: Field) -> [u8; 32] {
-    x.to_be_bytes()
-}
-
 // returns x * 2^-16, interpreted as an integer
 // Scaling down is needed for example after multiplying 2 Quantized values
 pub fn scale_down(x: Field) -> Field {
     let mut z = x;
-    let mut bytes: [u8; 32] = [0; 32];
 
     let negative = is_negative(z);
 
@@ -19,10 +14,6 @@ pub fn scale_down(x: Field) -> Field {
                 - z
         )
         + z;
-    unsafe {
-        bytes = get_bytes(z);
-    }
-    assert(Field::from_be_bytes::<32>(bytes) == z);
 
     // Division by 2^16, code as suggested by Tom French @TomAFrench
     // Cast x to a u16 to preserve only the lowest 16 bits.

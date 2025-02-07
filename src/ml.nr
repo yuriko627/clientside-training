@@ -1,5 +1,5 @@
+use super::quantized::Quantized;
 use super::utils::{assert_bitsize, scale_down};
-use noir_fixed_point::quantized::Quantized;
 
 // Restricting Quantized use to 126 bits on either sides (positive and negative)
 

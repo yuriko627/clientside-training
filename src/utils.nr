@@ -1,4 +1,4 @@
-use noir_fixed_point::quantized::{is_negative, Quantized};
+use super::quantized::{is_negative, Quantized};
 use std::field::bn254::decompose;
 
 // returns x * 2^-16, interpreted as an integer

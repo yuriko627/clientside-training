@@ -151,13 +151,13 @@ impl Ord for Quantized {
     fn cmp(self: Self, other: Self) -> Ordering {
         if self.x == other.x {
             Ordering::equal()
-        }
-
-        let (_, sub_hi) = decompose(self.x - other.x);
-        if (sub_hi == 0) {
-            Ordering::greater()
         } else {
-            Ordering::less()
+            let (_, sub_hi) = decompose(self.x - other.x);
+            if (sub_hi == 0) {
+                Ordering::greater()
+            } else {
+                Ordering::less()
+            }
         }
     }
 }

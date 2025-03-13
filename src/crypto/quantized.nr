@@ -1,9 +1,9 @@
 use std::cmp::Ordering;
 use std::field::bn254::decompose;
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Mul, Sub};
 
 // IMPORTANT: This library is designed to work with a scale factor of 2^(8*factor).
-global scale: Field = 65536; // 2^(8*2) = 2^16
+// global scale: Field = 65536; // 2^(8*2) = 2^16
 
 // NOTE: this is a version of the noir-fixed-point library without overflow checks
 // Ref: https://github.com/hashcloak/noir-fixed-point/

@@ -441,8 +441,8 @@ fn test_ml_training() {
     ];
 
     let epochs = 10;
-    let learning_rate = Quantized::new(6554); //0.1  0.1/2^-16 6553.6
-    let ratio = Quantized::new(2185); // 1/nr samples = 1/30 => (1/30)/2^-16 = 2184.53
+    // let learning_rate = Quantized::new(6554); //0.1  0.1/2^-16 6553.6
+    // let ratio = Quantized::new(2185); // 1/nr samples = 1/30 => (1/30)/2^-16 = 2184.53
     let learning_rate_ratio = Quantized::new(218); // 0.1*(1/30)=0.003 => 218
     let parameters = train_multi_class(
         epochs,

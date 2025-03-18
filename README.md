@@ -7,7 +7,6 @@ Notes for myself:
 
 Whole flow:
 - `nargo execute --skip-underconstrained-check`: this outputs the trained model
-- `bb prove -b ./target/clientside-training.json -w ./target/clientside-training.gz -o ./target/proof`: this outputs the circuit size (currently `num_filled_gates: 660166`)
-- `bb write_vk -b ./target/clientside-training.json -o ./target/vk `
+- `bb prove -b ./target/clientside_training.json -w ./target/clientside_training.gz -o ./target/proof`: this outputs the circuit size (currently `num_filled_gates: 660166`)
+- `bb write_vk -b ./target/clientside_training.json -o ./target/vk`
 - `bb verify -k ./target/vk -p ./target/proof`
-

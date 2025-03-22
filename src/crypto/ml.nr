@@ -3,6 +3,12 @@ use super::utils::{assert_bitsize, scale_down};
 
 // Restricting Quantized use to 126 bits on either sides (positive and negative)
 
+pub struct TrainedModel<let M: u32> {
+    weights: [Quantized; M],
+    bias: Quantized,
+    n_samples: Field, // number of training samples used
+}
+
 // output upper limit 35 bits
 fn approx_sigmoid(x: Quantized) -> Quantized {
     // Follows https://github.com/data61/MP-SPDZ/blob/master/Compiler/ml.py#L110
@@ -68,6 +74,8 @@ fn get_prediction<let M: u32>(
     approx_sigmoid(temp)
 }
 
+// N: Number of samples
+// M: Number of features per sample
 pub fn train<let N: u32, let M: u32>(
     epochs: u64,
     inputs: [[Quantized; M]; N],
@@ -123,13 +131,16 @@ pub fn train<let N: u32, let M: u32>(
     (final_weights, final_bias)
 }
 
+// N: Number of samples
+// M: Number of features per sample
+// C: Numebr of classes
 pub fn train_multi_class<let N: u32, let M: u32, let C: u32>(
     epochs: u64,
     inputs: [[Quantized; M]; N],
     labels: [[Quantized; N]; C],
     learning_rate_ratio: Quantized,
     // learning_rate*ratio, where ratio=1/nr_samples. We cap this at 0.1*0.1=0.01 => 655 is 11 bits
-) -> [([Quantized; M], Quantized); C] {
+) -> [TrainedModel<M>; C] {
     // Assert all inputs have max 20 bits
     // alternative: restrict to 17 bits and work with normalized values
     for i in 0..N {
@@ -148,11 +159,23 @@ pub fn train_multi_class<let N: u32, let M: u32, let C: u32>(
         }
     }
 
-    let mut result_parameters = [([Quantized { x: 0 }; M], Quantized { x: 0 }); C];
+    let mut result_parameters: [TrainedModel<M>; C] = [
+        TrainedModel {
+            weights: [Quantized::zero(); M],
+            bias: Quantized::zero(),
+            n_samples: Field::from(0),
+        }; C
+    ];
+
     for i in 0..C {
-        let parameters = train(epochs, inputs, labels[i], learning_rate_ratio);
-        result_parameters[i] = parameters;
+        let (weights, bias) = train(epochs, inputs, labels[i], learning_rate_ratio);
+        result_parameters[i] = TrainedModel {
+            weights,
+            bias,
+            n_samples: Field::from(N), // Add sample count here
+        };
     }
+
     result_parameters
 }
 
